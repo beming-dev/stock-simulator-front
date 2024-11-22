@@ -1,29 +1,30 @@
-# Step 1: Build the React app
-FROM node:20 as build-stage
+# 1. Node.js 이미지를 사용하여 빌드
+FROM node:20 AS build
 
-# Set the working directory
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
-
-# Install dependencies
+# 의존성 설치
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the entire app source code
+# 소스 파일 복사
 COPY . .
 
-# Build the app for production
+# Vite로 빌드
 RUN npm run build
 
-# Step 2: Serve the built app using Nginx
-FROM nginx:alpine AS production-stage
+# 2. Nginx 이미지를 사용하여 배포
+FROM nginx:latest
 
-# Copy the built files from the previous stage to the Nginx web root
-COPY --from=build-stage /app/build /usr/share/nginx/html
+# Nginx 기본 설정을 대체
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80
+# Vite 빌드 파일을 Nginx HTML 디렉토리에 복사
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Nginx가 80 포트로 서비스
 EXPOSE 80
 
-# Start Nginx server
+# Nginx 시작
 CMD ["nginx", "-g", "daemon off;"]
