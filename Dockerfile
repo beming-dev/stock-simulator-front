@@ -23,8 +23,8 @@ COPY nginx/nginx.conf /etc/nginx/nginx.conf
 # Vite 빌드 파일을 Nginx HTML 디렉토리에 복사
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Nginx가 80 포트로 서비스
-EXPOSE 80
+# Nginx가 3000 포트로 서비스
+EXPOSE 3000
 
 # Nginx 시작
 CMD ["nginx", "-g", "daemon off;"]
