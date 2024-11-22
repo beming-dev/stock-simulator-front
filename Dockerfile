@@ -1,5 +1,5 @@
 # Step 1: Build the React app
-FROM node:16 as build-stage
+FROM node:20 as build-stage
 
 # Set the working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the app for production
-RUN npm run build && ls -l /app/build
+RUN npm run build
 
 # Step 2: Serve the built app using Nginx
 FROM nginx:alpine AS production-stage
