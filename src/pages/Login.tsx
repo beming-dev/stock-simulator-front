@@ -6,15 +6,23 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  function handleGoogleLogin() {
+    const handleLogin = () => {
+      const clientId = "YOUR_GOOGLE_CLIENT_ID";
+      const redirectUri = "http://localhost:8080/api/oauth/google";
+      const scope = "profile email";
+      const responseType = "code";
+
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+    };
+
+    return <button onClick={handleLogin}>Login with Google</button>;
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Username:", username, "Password:", password);
     navigate("/dashboard");
-  };
-
-  const handleGoogleLogin = () => {
-    console.log("Google Login Clicked!");
-    // Add Google login logic here
   };
 
   return (

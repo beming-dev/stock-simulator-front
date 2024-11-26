@@ -11,19 +11,19 @@ const Header: React.FC = () => {
         <nav className="space-x-6">
           <Link
             to="/"
-            className="hover:text-yellow-300 transition duration-200"
+            className="text-white hover:text-yellow-300 transition duration-200"
           >
             Home
           </Link>
           <Link
             to="/dashboard"
-            className="hover:text-yellow-300 transition duration-200"
+            className="text-white hover:text-yellow-300 transition duration-200"
           >
             Dashboard
           </Link>
           <Link
             to="/login"
-            className="hover:text-yellow-300 transition duration-200"
+            className="text-white hover:text-yellow-300 transition duration-200"
           >
             Login
           </Link>
