@@ -73,9 +73,9 @@ const StockDetail: React.FC = () => {
               Stock Chart
             </h2>
             <div className="h-64 bg-gray-100 flex items-center justify-center rounded-lg">
-              <p className="text-gray-500">
+              <div className="text-gray-500">
                 <StockChart />
-              </p>
+              </div>
             </div>
           </div>
 

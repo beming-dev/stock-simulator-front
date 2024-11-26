@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import StockDetail from "./pages/StockDetail";
+import LoginSuccessPage from "./pages/LoginSuccess";
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/detail" element={<StockDetail />} />
+        <Route path="/login-success" element={<LoginSuccessPage />} />
       </Routes>
     </Router>
   );

@@ -22,7 +22,7 @@ const StockList: React.FC = () => {
       <h3 className="text-xl font-semibold mb-4">Available Stocks</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {stocks.map((stock) => (
-          <Link to={`/detail?id=${stock.symbol}`}>
+          <Link to={`/detail?id=${stock.symbol}`} key={stock.symbol}>
             <div
               key={stock.symbol}
               className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-200"
