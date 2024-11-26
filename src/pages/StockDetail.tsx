@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
+import { StockData } from "../type/type";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const stockId = searchParams.get("id"); // Query로 전달된 주식 ID
+  const stockId: string = searchParams.get("id") || "AAPL"; // Query로 전달된 주식 ID
   const [stock, setStock] = useState<any>(null);
   const [quantity, setQuantity] = useState<number>(0);
 
   // Mock 데이터
-  const mockStocks = {
+  const mockStocks: StockData = {
     AAPL: {
       symbol: "AAPL",
       name: "Apple Inc.",
