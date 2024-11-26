@@ -1,22 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    if (isLoggedIn) navigate("/dashboard");
+  }, []);
 
   function handleGoogleLogin() {
-    const handleLogin = () => {
-      const clientId = "YOUR_GOOGLE_CLIENT_ID";
-      const redirectUri = "http://localhost:8080/api/oauth/google";
-      const scope = "profile email";
-      const responseType = "code";
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    console.log(clientId);
+    const redirectUri = "http://localhost:3000/api/oauth/google";
+    const responseType = "code";
+    const scope = "profile email";
 
-      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
-    };
-
-    return <button onClick={handleLogin}>Login with Google</button>;
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
   }
 
   const handleLogin = (e: React.FormEvent) => {
