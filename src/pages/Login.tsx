@@ -14,7 +14,6 @@ const Login: React.FC = () => {
 
   function handleGoogleLogin() {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    console.log(clientId);
     // const redirectUri = "http://localhost:3000/api/oauth/google";
     const redirectUri = "https://beming-stock-back.kro.kr/api/oauth/google";
     const responseType = "code";
