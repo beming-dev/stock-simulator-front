@@ -15,7 +15,6 @@ const Login: React.FC = () => {
   function handleGoogleLogin() {
     const BACK_BASE_URL = import.meta.env.VITE_BACK_BASE_URL;
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    // const redirectUri = "http://localhost:3000/api/oauth/google";
     const redirectUri = BACK_BASE_URL + "/api/oauth/google";
     const responseType = "code";
     const scope = "profile email";
