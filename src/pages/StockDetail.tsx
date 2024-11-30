@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
+import axios from "axios";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,8 @@ const StockDetail: React.FC = () => {
       price: 150.0,
       high: 152.5,
       low: 147.0,
+      country: "NAS",
+      type: "NAS",
     },
     GOOGL: {
       symbol: "GOOGL",
@@ -24,6 +27,8 @@ const StockDetail: React.FC = () => {
       price: 720.0,
       high: 740.0,
       low: 700.0,
+      country: "NAS",
+      type: "NAS",
     },
     AMZN: {
       symbol: "AMZN",
@@ -31,8 +36,19 @@ const StockDetail: React.FC = () => {
       price: 3400.0,
       high: 3425.0,
       low: 3380.0,
+      country: "NAS",
+      type: "NAS",
     },
   };
+
+  useEffect(() => {
+    if (stock) {
+      const backUrl = import.meta.env.VITE_BACK_BASE_URL;
+      axios
+        .get(`${backUrl}/stockApi/overseas/currentPrice?SYMB=${stock.symbol}`)
+        .then((data) => console.log(data));
+    }
+  }, [stock]);
 
   // 주식 정보 로드
   useEffect(() => {
@@ -42,6 +58,56 @@ const StockDetail: React.FC = () => {
       setStock(null); // 유효하지 않은 ID 처리
     }
   }, [stockId]);
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    if (!stock?.country) return;
+
+    // WebSocket 연결
+    const webSocket = new WebSocket("ws://localhost:3000/ws");
+
+    webSocket.onopen = () => {
+      const socketOpenDate = JSON.stringify({
+        type: "subscribe",
+        tr_type: "1",
+        tr_key: stock.country == "NAS" ? "DNAS" + stock.symbol : stock.symbol,
+        tr_id: stock.country == "NAS" ? "HDFSCNT0" : "HDFSCNT0",
+      });
+
+      webSocket.send(socketOpenDate);
+    };
+
+    webSocket.onmessage = (event) => {
+      const message = event.data;
+      console.log("Received message:", message);
+      setMessages((prev) => [...prev, message]);
+    };
+
+    webSocket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    webSocket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    setSocket(webSocket);
+
+    // 컴포넌트 언마운트 시 WebSocket 연결 종료
+    return () => {
+      if (webSocket) {
+        webSocket.close();
+      }
+    };
+  }, [stock]);
+
+  // const sendMessage = (message) => {
+  //   if (socket && socket.readyState === WebSocket.OPEN) {
+  //     socket.send(message);
+  //   }
+  // };
 
   const handleBuy = () => {
     alert(`Successfully bought ${quantity} shares of ${stock?.symbol}`);
