@@ -87,17 +87,17 @@ const StockDetail: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-20">
       {stock ? (
         <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6">
           {/* Stock Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col items-start justify-between mb-6 sm:flex-row sm:items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">{stock.name}</h1>
               <p className="text-gray-500">Symbol: {stock.symbol}</p>
             </div>
             <div>
-              <p className="text-xl font-semibold text-blue-500">
+              <p className="text-xl font-semibold text-blue-500 mt-4 sm:mt-0">
                 Current Price: ${stock.price}
               </p>
             </div>
@@ -108,7 +108,7 @@ const StockDetail: React.FC = () => {
             <h2 className="text-xl font-bold text-gray-700 mb-4">
               Stock Chart
             </h2>
-            <div className="h-64 bg-gray-100 flex items-center justify-center rounded-lg">
+            <div className="w-full h-64 bg-gray-100 flex items-center justify-center rounded-lg">
               <div className="text-gray-500">
                 <StockChart />
               </div>

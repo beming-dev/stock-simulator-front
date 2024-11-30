@@ -10,7 +10,6 @@ interface Trade {
 }
 
 const Dashboard: React.FC = () => {
-  // Mock portfolio data
   const portfolio: Trade[] = [
     {
       symbol: "AAPL",
@@ -35,20 +34,22 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  // Calculate Profit/Loss Percentage
   const calculateProfitLoss = (averagePrice: number, currentPrice: number) => {
     return ((currentPrice - averagePrice) / averagePrice) * 100;
   };
 
   const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="container mx-auto py-12">
+      <div className="container mx-auto py-12 px-4">
         <h2 className="text-3xl font-bold text-blue-600 mb-8">
           Your Portfolio
         </h2>
+
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <table className="w-full border-collapse border border-gray-200">
+          {/* Table for large screens */}
+          <table className="hidden md:table w-full border-collapse border border-gray-200">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-4 text-left text-sm font-semibold text-gray-600 border-b">
@@ -110,6 +111,43 @@ const Dashboard: React.FC = () => {
               })}
             </tbody>
           </table>
+
+          {/* Responsive cards for small screens */}
+          <div className="md:hidden grid gap-4">
+            {portfolio.map((trade) => {
+              const profitLoss = calculateProfitLoss(
+                trade.averagePrice,
+                trade.currentPrice
+              );
+              return (
+                <div
+                  key={trade.symbol}
+                  className="p-4 bg-gray-50 rounded-lg shadow-md border hover:bg-gray-100"
+                  onClick={() => navigate(`/detail?id=${trade.symbol}`)}
+                >
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {trade.name} ({trade.symbol})
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quantity: {trade.quantity}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Avg. Price: ${trade.averagePrice.toFixed(2)}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Current Price: ${trade.currentPrice.toFixed(2)}
+                  </p>
+                  <p
+                    className={`text-sm font-semibold ${
+                      profitLoss >= 0 ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    Profit/Loss: {profitLoss.toFixed(2)}%
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
