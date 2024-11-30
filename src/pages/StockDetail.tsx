@@ -7,7 +7,7 @@ import { useWebSocket } from "../context/WebSocketContext";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const stockId: string = searchParams.get("id") || "AAPL"; // Query로 전달된 주식 ID
+  const stockSymbol: string = searchParams.get("id") || "AAPL"; // Query로 전달된 주식 ID
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const { socket, messages } = useWebSocket();
@@ -44,12 +44,12 @@ const StockDetail: React.FC = () => {
   };
 
   useEffect(() => {
-    if (socket && stock) {
+    if (socket && socket.readyState === WebSocket.OPEN && stock) {
       const socketOpenDate = JSON.stringify({
         type: "subscribe",
         tr_type: "1",
-        tr_key: stock.country === "NAS" ? "DNAS" + stock.symbol : stock.symbol,
-        tr_id: stock.country === "NAS" ? "HDFSCNT0" : "HDFSCNT0",
+        rq_type: "current",
+        symbol: stockSymbol,
       });
 
       socket.send(socketOpenDate);
@@ -58,18 +58,18 @@ const StockDetail: React.FC = () => {
 
   // 주식 정보 로드
   useEffect(() => {
-    if (stockId && mockStocks[stockId]) {
-      setStock(mockStocks[stockId]);
+    if (stockSymbol && mockStocks[stockSymbol]) {
+      setStock(mockStocks[stockSymbol]);
     } else {
       setStock(null); // 유효하지 않은 ID 처리
     }
-  }, [stockId]);
+  }, [stockSymbol]);
 
   useEffect(() => {
     if (stock) {
       const backUrl = import.meta.env.VITE_BACK_BASE_URL;
       axios
-        .get(`${backUrl}/stockApi/overseas/currentPrice?SYMB=${stock.symbol}`)
+        .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
         .then((data) => console.log(data));
     }
   }, [stock]);
