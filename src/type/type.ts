@@ -1,13 +1,15 @@
+export type MockStockData = {
+  [key: string]: StockData;
+};
+
 export type StockData = {
-  [key: string]: {
-    symbol: string;
-    name: string;
-    price: number;
-    high: number;
-    low: number;
-    country: string;
-    type: string;
-  };
+  symbol: string;
+  name: string;
+  price: number;
+  high: number;
+  low: number;
+  country: string;
+  type: string;
 };
 
 export type StockCurrentPrice = {

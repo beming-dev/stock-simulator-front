@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
-import { StockData } from "../type/type";
+import { MockStockData, StockData } from "../type/type";
 import axios from "axios";
+import { useWebSocket } from "../context/WebSocketContext";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const stockId: string = searchParams.get("id") || "AAPL"; // Query로 전달된 주식 ID
-  const [stock, setStock] = useState<any>(null);
+  const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const { socket, messages } = useWebSocket();
 
   // Mock 데이터
-  const mockStocks: StockData = {
+  const mockStocks: MockStockData = {
     AAPL: {
       symbol: "AAPL",
       name: "Apple Inc.",
@@ -42,13 +44,17 @@ const StockDetail: React.FC = () => {
   };
 
   useEffect(() => {
-    if (stock) {
-      const backUrl = import.meta.env.VITE_BACK_BASE_URL;
-      axios
-        .get(`${backUrl}/stockApi/overseas/currentPrice?SYMB=${stock.symbol}`)
-        .then((data) => console.log(data));
+    if (socket && stock) {
+      const socketOpenDate = JSON.stringify({
+        type: "subscribe",
+        tr_type: "1",
+        tr_key: stock.country === "NAS" ? "DNAS" + stock.symbol : stock.symbol,
+        tr_id: stock.country === "NAS" ? "HDFSCNT0" : "HDFSCNT0",
+      });
+
+      socket.send(socketOpenDate);
     }
-  }, [stock]);
+  }, [socket, stock]);
 
   // 주식 정보 로드
   useEffect(() => {
@@ -59,48 +65,13 @@ const StockDetail: React.FC = () => {
     }
   }, [stockId]);
 
-  const [messages, setMessages] = useState<any[]>([]);
-  const [socket, setSocket] = useState<any>(null);
-
   useEffect(() => {
-    if (!stock?.country) return;
-
-    // WebSocket 연결
-    const webSocket = new WebSocket("ws://localhost:3000/ws");
-
-    webSocket.onopen = () => {
-      const socketOpenDate = JSON.stringify({
-        type: "subscribe",
-        tr_type: "1",
-        tr_key: stock.country == "NAS" ? "DNAS" + stock.symbol : stock.symbol,
-        tr_id: stock.country == "NAS" ? "HDFSCNT0" : "HDFSCNT0",
-      });
-
-      webSocket.send(socketOpenDate);
-    };
-
-    webSocket.onmessage = (event) => {
-      const message = event.data;
-      console.log("Received message:", message);
-      setMessages((prev) => [...prev, message]);
-    };
-
-    webSocket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    webSocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    setSocket(webSocket);
-
-    // 컴포넌트 언마운트 시 WebSocket 연결 종료
-    return () => {
-      if (webSocket) {
-        webSocket.close();
-      }
-    };
+    if (stock) {
+      const backUrl = import.meta.env.VITE_BACK_BASE_URL;
+      axios
+        .get(`${backUrl}/stockApi/overseas/currentPrice?SYMB=${stock.symbol}`)
+        .then((data) => console.log(data));
+    }
   }, [stock]);
 
   // const sendMessage = (message) => {
