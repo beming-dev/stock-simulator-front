@@ -13,35 +13,51 @@ const StockDetail: React.FC = () => {
   const { socket, messages } = useWebSocket();
 
   // Mock 데이터
-  const mockStocks: MockStockData = {
-    AAPL: {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      price: 150.0,
-      high: 152.5,
-      low: 147.0,
-      country: "NAS",
-      type: "NAS",
-    },
-    GOOGL: {
-      symbol: "GOOGL",
-      name: "Tesla Inc.",
-      price: 720.0,
-      high: 740.0,
-      low: 700.0,
-      country: "NAS",
-      type: "NAS",
-    },
-    AMZN: {
-      symbol: "AMZN",
-      name: "Amazon.com Inc.",
-      price: 3400.0,
-      high: 3425.0,
-      low: 3380.0,
-      country: "NAS",
-      type: "NAS",
-    },
-  };
+  // const mockStocks: MockStockData = {
+  //   AAPL: {
+  //     symbol: "AAPL",
+  //     name: "Apple Inc.",
+  //     price: 150.0,
+  //     high: 152.5,
+  //     low: 147.0,
+  //     country: "NAS",
+  //     type: "NAS",
+  //   },
+  //   GOOGL: {
+  //     symbol: "GOOGL",
+  //     name: "Tesla Inc.",
+  //     price: 720.0,
+  //     high: 740.0,
+  //     low: 700.0,
+  //     country: "NAS",
+  //     type: "NAS",
+  //   },
+  //   AMZN: {
+  //     symbol: "AMZN",
+  //     name: "Amazon.com Inc.",
+  //     price: 3400.0,
+  //     high: 3425.0,
+  //     low: 3380.0,
+  //     country: "NAS",
+  //     type: "NAS",
+  //   },
+  // };
+
+  useEffect(() => {
+    const backUrl = import.meta.env.VITE_BACK_BASE_URL;
+    axios
+      .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
+      .then(({ data }: { data: StockData }) => setStock(data));
+  }, []);
+
+  // // 주식 정보 로드
+  // useEffect(() => {
+  //   if (stockSymbol && mockStocks[stockSymbol]) {
+  //     setStock(mockStocks[stockSymbol]);
+  //   } else {
+  //     setStock(null); // 유효하지 않은 ID 처리
+  //   }
+  // }, [stockSymbol]);
 
   useEffect(() => {
     if (socket && socket.readyState === WebSocket.OPEN && stock) {
@@ -55,24 +71,6 @@ const StockDetail: React.FC = () => {
       socket.send(socketOpenDate);
     }
   }, [socket, stock]);
-
-  // 주식 정보 로드
-  useEffect(() => {
-    if (stockSymbol && mockStocks[stockSymbol]) {
-      setStock(mockStocks[stockSymbol]);
-    } else {
-      setStock(null); // 유효하지 않은 ID 처리
-    }
-  }, [stockSymbol]);
-
-  useEffect(() => {
-    if (stock) {
-      const backUrl = import.meta.env.VITE_BACK_BASE_URL;
-      axios
-        .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
-        .then((data) => console.log(data));
-    }
-  }, [stock]);
 
   // const sendMessage = (message) => {
   //   if (socket && socket.readyState === WebSocket.OPEN) {
@@ -100,7 +98,7 @@ const StockDetail: React.FC = () => {
             </div>
             <div>
               <p className="text-xl font-semibold text-blue-500">
-                Current Price: ${stock.price.toFixed(2)}
+                Current Price: ${stock.price}
               </p>
             </div>
           </div>
@@ -120,15 +118,15 @@ const StockDetail: React.FC = () => {
           {/* Stock Info */}
           <div className="mb-6 grid grid-cols-2 gap-4">
             <div className="bg-gray-50 p-4 rounded-lg shadow">
-              <p className="text-sm text-gray-500">Day High</p>
+              <p className="text-sm text-gray-500">Day Low</p>
               <p className="text-lg font-semibold text-gray-800">
-                ${stock.high.toFixed(2)}
+                ${stock.low}
               </p>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg shadow">
-              <p className="text-sm text-gray-500">Day Low</p>
+              <p className="text-sm text-gray-500">Day High</p>
               <p className="text-lg font-semibold text-gray-800">
-                ${stock.low.toFixed(2)}
+                ${stock.high}
               </p>
             </div>
           </div>
