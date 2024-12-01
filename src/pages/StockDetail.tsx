@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
-import { MockStockData, StockData } from "../type/type";
+import { StockData } from "../type/type";
 import axios from "axios";
 import { useWebSocket } from "../context/WebSocketContext";
+import { useAuth } from "../context/AuthContext";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -11,6 +12,7 @@ const StockDetail: React.FC = () => {
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const { socket } = useWebSocket();
+  const { token } = useAuth();
 
   useEffect(() => {
     const backUrl = import.meta.env.VITE_BACK_BASE_URL;
@@ -32,11 +34,45 @@ const StockDetail: React.FC = () => {
     }
   }, [socket, stock]);
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
+    if (!token) {
+      alert("로그인 후 이용해주세요");
+      return;
+    }
+    console.log(token);
+    await axios.post(
+      "http://localhost:3000/stock/buy",
+      {
+        symbol: stockSymbol,
+        amount: quantity,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     alert(`Successfully bought ${quantity} shares of ${stock?.symbol}`);
   };
 
-  const handleSell = () => {
+  const handleSell = async () => {
+    if (!token) {
+      alert("로그인 후 이용해주세요");
+      return;
+    }
+    await axios.post(
+      "http://localhost:3000/stock/sell",
+      {
+        symbol: stockSymbol,
+        amount: quantity,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
     alert(`Successfully sold ${quantity} shares of ${stock?.symbol}`);
   };
 

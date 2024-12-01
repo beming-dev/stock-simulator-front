@@ -33,6 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (newToken: string) => {
     sessionStorage.setItem("token", newToken); // Store token in session storage
+    console.log(newToken);
     setToken(newToken); // Update state
   };
 

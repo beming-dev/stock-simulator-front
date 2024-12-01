@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 interface Trade {
   symbol: string;
@@ -33,12 +34,20 @@ const Dashboard: React.FC = () => {
       currentPrice: 3400.0,
     },
   ];
+  const { token } = useAuth();
 
   const calculateProfitLoss = (averagePrice: number, currentPrice: number) => {
     return ((currentPrice - averagePrice) / averagePrice) * 100;
   };
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      alert("로그인 후 이용해주세요.");
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">

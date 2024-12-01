@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { FaBars, FaTimes } from "react-icons/fa";
 
 const Header: React.FC = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { token, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
