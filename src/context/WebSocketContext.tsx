@@ -12,6 +12,7 @@ export type StructuredDataType = {
 type WebSocketContextType = {
   socket: WebSocket | null;
   messages: StructuredDataType[];
+  isConnected: boolean;
 };
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -23,11 +24,13 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [messages, setMessages] = useState<StructuredDataType[]>([]);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
     const webSocket = new WebSocket("ws://localhost:3000/ws");
 
     webSocket.onopen = () => {
+      setIsConnected(true);
       console.log("WebSocket connected");
     };
 
@@ -81,7 +84,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <WebSocketContext.Provider value={{ socket, messages }}>
+    <WebSocketContext.Provider value={{ socket, messages, isConnected }}>
       {children}
     </WebSocketContext.Provider>
   );

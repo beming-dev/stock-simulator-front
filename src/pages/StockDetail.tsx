@@ -14,7 +14,7 @@ const StockDetail: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
 
-  const { socket, messages } = useWebSocket();
+  const { socket, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
 
   useEffect(() => {
@@ -46,7 +46,10 @@ const StockDetail: React.FC = () => {
   }, [stock]);
 
   useEffect(() => {
-    if (socket && socket.readyState === WebSocket.OPEN && stock) {
+    console.log(socket);
+    console.log(WebSocket.OPEN);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      console.log("hehee");
       const socketOpenDate = JSON.stringify({
         type: "subscribe",
         tr_type: "1",
@@ -56,7 +59,20 @@ const StockDetail: React.FC = () => {
 
       socket.send(socketOpenDate);
     }
-  }, [socket, stock]);
+
+    return () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        const socketOpenDate = JSON.stringify({
+          type: "subscribe",
+          tr_type: "2",
+          rq_type: "current",
+          symbol: stockSymbol,
+        });
+
+        socket.send(socketOpenDate);
+      }
+    };
+  }, [socket, isConnected]);
 
   const handleBuy = async () => {
     // if (!token) {
