@@ -13,15 +13,20 @@ const StockDetail: React.FC = () => {
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
+  const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
 
   const { socket, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
 
+  //parsing recieved data from websocket
   useEffect(() => {
     if (stock) {
-      const lastMessage: StructuredDataType = messages[messages.length - 1];
+      const symbolMessage = messages[stockSymbol];
+      setRealtimeData(symbolMessage);
 
-      console.log(lastMessage);
+      const lastMessage: StructuredDataType =
+        symbolMessage[symbolMessage?.length - 1];
+
       const newStockData: StockData = {
         ...stock,
         price: parseInt(lastMessage.currentPrice),
@@ -32,6 +37,8 @@ const StockDetail: React.FC = () => {
       setStock(newStockData);
     }
   }, [messages]);
+
+  //get current stock price when user enter this page
   useEffect(() => {
     const backUrl = import.meta.env.VITE_BACK_BASE_URL;
     axios
@@ -39,17 +46,16 @@ const StockDetail: React.FC = () => {
       .then(({ data }: { data: StockData }) => setStock(data));
   }, []);
 
+  //select current symbol after stock data is fetched
   useEffect(() => {
     if (stock && (stock.country == "KSP" || stock.country == "KSD")) {
       setCurrentSymbol("\\");
     }
   }, [stock]);
 
+  //open websocket connection
   useEffect(() => {
-    console.log(socket);
-    console.log(WebSocket.OPEN);
     if (socket && socket.readyState === WebSocket.OPEN) {
-      console.log("hehee");
       const socketOpenDate = JSON.stringify({
         type: "subscribe",
         tr_type: "1",
@@ -173,6 +179,13 @@ const StockDetail: React.FC = () => {
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-4">
               Trade
             </h2>
+            <div className="flex justify-center items-center mb-4">
+              <span className="shrink-0 mr-4">Current price: </span>
+              <span className="m-0 w-full sm:w-1/3">
+                {currentSymbol}
+                {stock.price}
+              </span>
+            </div>
             <div className="flex flex-wrap items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <input
                 type="number"
@@ -219,7 +232,7 @@ const StockDetail: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {messages.reverse().map((data, index) => (
+                  {realtimeData.reverse().map((data, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="p-2 text-left text-xs text-gray-800">
                         {data.time}
@@ -239,7 +252,7 @@ const StockDetail: React.FC = () => {
 
             {/* Cards for small screens */}
             <div className="sm:hidden grid gap-2 overflow-y-auto max-h-64">
-              {messages.reverse().map((data, index) => (
+              {realtimeData.reverse().map((data, index) => (
                 <div
                   key={index}
                   className="bg-gray-50 p-2 rounded-lg shadow-sm border"
