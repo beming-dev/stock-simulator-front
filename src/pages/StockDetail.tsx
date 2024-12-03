@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
 import axios from "axios";
-import { useWebSocket } from "../context/WebSocketContext";
+import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import { useAuth } from "../context/AuthContext";
 
 const StockDetail: React.FC = () => {
@@ -14,9 +14,24 @@ const StockDetail: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
 
-  const { socket } = useWebSocket();
+  const { socket, messages } = useWebSocket();
   const { token } = useAuth();
 
+  useEffect(() => {
+    if (stock) {
+      const lastMessage: StructuredDataType = messages[messages.length - 1];
+
+      console.log(lastMessage);
+      const newStockData: StockData = {
+        ...stock,
+        price: parseInt(lastMessage.currentPrice),
+        high: parseInt(lastMessage.high),
+        low: parseInt(lastMessage.low),
+      };
+
+      setStock(newStockData);
+    }
+  }, [messages]);
   useEffect(() => {
     const backUrl = import.meta.env.VITE_BACK_BASE_URL;
     axios
@@ -164,6 +179,64 @@ const StockDetail: React.FC = () => {
                   Sell
                 </button>
               </div>
+            </div>
+          </div>
+          {/* Volume Section */}
+          <div className="mt-20">
+            <h2 className="text-md sm:text-lg font-bold text-gray-700 mb-2">
+              Trading Volume
+            </h2>
+            {/* Table for large screens */}
+            <div className="hidden sm:block border border-gray-200 rounded-lg">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-100 sticky top-0">
+                  <tr>
+                    <th className="p-2 text-left text-xs font-semibold text-gray-600">
+                      Time
+                    </th>
+                    <th className="p-2 text-right text-xs font-semibold text-gray-600">
+                      Price
+                    </th>
+                    <th className="p-2 text-right text-xs font-semibold text-gray-600">
+                      Volume
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {messages.reverse().map((data, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="p-2 text-left text-xs text-gray-800">
+                        {data.time}
+                      </td>
+                      <td className="p-2 text-right text-xs text-gray-800">
+                        {currentSymbol}
+                        {parseFloat(data.currentPrice).toFixed(2)}
+                      </td>
+                      <td className="p-2 text-right text-xs text-gray-800">
+                        {parseInt(data.volume, 10).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cards for small screens */}
+            <div className="sm:hidden grid gap-2 overflow-y-auto max-h-64">
+              {messages.reverse().map((data, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 p-2 rounded-lg shadow-sm border"
+                >
+                  <p className="text-xs text-gray-500">Time: {data.time}</p>
+                  <p className="text-xs text-gray-800 font-semibold">
+                    Price: {data.currentPrice}
+                  </p>
+                  <p className="text-xs text-gray-800 font-semibold">
+                    Volume: {data.volume}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
