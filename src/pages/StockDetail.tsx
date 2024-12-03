@@ -9,8 +9,11 @@ import { useAuth } from "../context/AuthContext";
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const stockSymbol: string = searchParams.get("id") || "AAPL";
+
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const [currentSymbol, setCurrentSymbol] = useState("$");
+
   const { socket } = useWebSocket();
   const { token } = useAuth();
 
@@ -20,6 +23,12 @@ const StockDetail: React.FC = () => {
       .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
       .then(({ data }: { data: StockData }) => setStock(data));
   }, []);
+
+  useEffect(() => {
+    if (stock && (stock.country == "KSP" || stock.country == "KSD")) {
+      setCurrentSymbol("\\");
+    }
+  }, [stock]);
 
   useEffect(() => {
     if (socket && socket.readyState === WebSocket.OPEN && stock) {
@@ -35,13 +44,13 @@ const StockDetail: React.FC = () => {
   }, [socket, stock]);
 
   const handleBuy = async () => {
-    if (!token) {
-      alert("로그인 후 이용해주세요");
-      return;
-    }
-    console.log(token);
+    // if (!token) {
+    //   alert("로그인 후 이용해주세요");
+    //   return;
+    // }
+
     await axios.post(
-      "http://localhost:3000/stock/buy",
+      `${import.meta.env.VITE_BACK_BASE_URL}/stock/buy`,
       {
         symbol: stockSymbol,
         amount: quantity,
@@ -61,7 +70,7 @@ const StockDetail: React.FC = () => {
       return;
     }
     await axios.post(
-      "http://localhost:3000/stock/sell",
+      `${import.meta.env.VITE_BACK_BASE_URL}/stock/sell`,
       {
         symbol: stockSymbol,
         amount: quantity,
@@ -92,7 +101,8 @@ const StockDetail: React.FC = () => {
             </div>
             <div className="mt-4 sm:mt-0">
               <p className="text-lg sm:text-xl font-semibold text-blue-500">
-                Current Price: ${stock.price}
+                Current Price: {currentSymbol}
+                {stock.price}
               </p>
             </div>
           </div>
@@ -114,13 +124,15 @@ const StockDetail: React.FC = () => {
             <div className="bg-gray-50 p-4 rounded-lg shadow">
               <p className="text-sm text-gray-500">Day Low</p>
               <p className="text-base sm:text-lg font-semibold text-gray-800">
-                ${stock.low}
+                {currentSymbol}
+                {stock.low}
               </p>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg shadow">
               <p className="text-sm text-gray-500">Day High</p>
               <p className="text-base sm:text-lg font-semibold text-gray-800">
-                ${stock.high}
+                {currentSymbol}
+                {stock.high}
               </p>
             </div>
           </div>
