@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
 import axios from "axios";
@@ -15,8 +15,9 @@ const StockDetail: React.FC = () => {
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
 
-  const { socket, messages, isConnected } = useWebSocket();
+  const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
+  const location = useLocation();
 
   //parsing recieved data from websocket
   useEffect(() => {
@@ -55,30 +56,32 @@ const StockDetail: React.FC = () => {
 
   //open websocket connection
   useEffect(() => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      const socketOpenDate = JSON.stringify({
+    if (isConnected) {
+      const socketOpenData = JSON.stringify({
         type: "subscribe",
         tr_type: "1",
         rq_type: "current",
         symbol: stockSymbol,
       });
 
-      socket.send(socketOpenDate);
+      sendMessage(socketOpenData);
     }
 
-    return () => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        const socketOpenDate = JSON.stringify({
-          type: "subscribe",
-          tr_type: "2",
-          rq_type: "current",
-          symbol: stockSymbol,
-        });
-
-        socket.send(socketOpenDate);
-      }
+    const handleBeforeUnload = () => {
+      const unsubscribeMessage = JSON.stringify({
+        type: "unsubscribe",
+        tr_type: "2",
+        rq_type: "current",
+        symbol: stockSymbol,
+      });
+      sendMessage(unsubscribeMessage);
     };
-  }, [socket, isConnected]);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      handleBeforeUnload();
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isConnected, stockSymbol, location.pathname]);
 
   const handleBuy = async () => {
     // if (!token) {

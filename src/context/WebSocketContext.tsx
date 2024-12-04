@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 
 export type StructuredDataType = {
   responseStatus: string;
@@ -11,13 +17,13 @@ export type StructuredDataType = {
 };
 
 type MessagesType = {
-  [symbol: string]: StructuredDataType[]; // 각 symbol별 데이터 배열
+  [symbol: string]: StructuredDataType[];
 };
 
 type WebSocketContextType = {
-  socket: WebSocket | null;
   messages: MessagesType;
   isConnected: boolean;
+  sendMessage: (message: string) => void;
 };
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -27,88 +33,97 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [messages, setMessages] = useState<MessagesType>([]);
+  const [messages, setMessages] = useState<MessagesType>({});
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const webSocket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const webSocket = new WebSocket("ws://localhost:3000/ws");
+    const connectWebSocket = () => {
+      const socketURL = import.meta.env.VITE_SOCKET_URL;
+      webSocket.current = new WebSocket(socketURL);
 
-    webSocket.onopen = () => {
-      setIsConnected(true);
-      console.log("WebSocket connected");
-    };
-
-    webSocket.onmessage = (event) => {
-      console.log(event.data);
-      const getKStructuredData = (data: string[]): StructuredDataType => {
-        const meta = data[0];
-        const metas = meta.split("|");
-        const symbol = metas[3];
-        const type = metas[1];
-
-        if (type == "H0STCNT0")
-          //한국주식
-          return {
-            symbol: symbol,
-            responseStatus: meta,
-            currentPrice: data[2],
-            high: data[8],
-            low: data[9],
-            volume: data[12],
-            time: data[1],
-          };
-        //미국주식
-        else
-          return {
-            symbol: "a",
-            responseStatus: data[0],
-            currentPrice: data[12],
-            high: data[9],
-            low: data[10],
-            volume: data[20],
-            time: data[7],
-          };
+      webSocket.current.onopen = () => {
+        setIsConnected(true);
+        console.log("WebSocket connected");
       };
 
-      const splitData = event.data.split("^");
-      const structuredData = getKStructuredData(splitData);
+      webSocket.current.onmessage = (event) => {
+        const splitData = event.data.split("^");
+        const getKStructuredData = (data: string[]): StructuredDataType => {
+          const meta = data[0];
+          const metas = meta.split("|");
+          const symbol = metas[3];
+          const type = metas[1];
 
-      setMessages((prev) => {
-        const symbol = structuredData.symbol;
-        const updatedSymbolMessages = prev[symbol] || [];
-        const updatedMessagesForSymbol = [
-          ...updatedSymbolMessages,
-          structuredData,
-        ];
-
-        // 배열 길이가 20 초과 시 앞의 데이터를 제거
-        const limitedMessages = updatedMessagesForSymbol.slice(-20);
-
-        return {
-          ...prev,
-          [symbol]: limitedMessages, // 해당 symbol의 메시지 업데이트
+          if (type === "H0STCNT0") {
+            return {
+              symbol: symbol,
+              responseStatus: meta,
+              currentPrice: data[2],
+              high: data[8],
+              low: data[9],
+              volume: data[12],
+              time: data[1],
+            };
+          } else {
+            return {
+              symbol: "a",
+              responseStatus: data[0],
+              currentPrice: data[12],
+              high: data[9],
+              low: data[10],
+              volume: data[20],
+              time: data[7],
+            };
+          }
         };
-      });
+
+        const structuredData = getKStructuredData(splitData);
+
+        setMessages((prev) => {
+          const symbol = structuredData.symbol;
+          const updatedSymbolMessages = prev[symbol] || [];
+          const updatedMessagesForSymbol = [
+            ...updatedSymbolMessages,
+            structuredData,
+          ];
+          const limitedMessages = updatedMessagesForSymbol.slice(-20);
+
+          return {
+            ...prev,
+            [symbol]: limitedMessages,
+          };
+        });
+      };
+
+      webSocket.current.onclose = () => {
+        setIsConnected(false);
+        console.log("WebSocket disconnected. Reconnecting...");
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      webSocket.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
     };
 
-    webSocket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    webSocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    setSocket(webSocket);
+    connectWebSocket();
 
     return () => {
-      webSocket.close();
+      webSocket.current?.close();
     };
   }, []);
 
+  const sendMessage = (message: string) => {
+    if (webSocket.current?.readyState === WebSocket.OPEN) {
+      webSocket.current.send(message);
+    } else {
+      console.error("WebSocket is not connected");
+    }
+  };
+
   return (
-    <WebSocketContext.Provider value={{ socket, messages, isConnected }}>
+    <WebSocketContext.Provider value={{ messages, isConnected, sendMessage }}>
       {children}
     </WebSocketContext.Provider>
   );
