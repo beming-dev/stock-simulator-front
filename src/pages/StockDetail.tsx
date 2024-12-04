@@ -156,6 +156,7 @@ const StockDetail: React.FC = () => {
               <div className="text-gray-500">
                 <StockChart />
               </div>
+              </div>
             </div>
           </div>
 
