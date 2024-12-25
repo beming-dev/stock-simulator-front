@@ -44,7 +44,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
       webSocket.current.onopen = () => {
         setIsConnected(true);
-        console.log("WebSocket connected");
+        console.log("WebSocket connected yeah");
       };
 
       webSocket.current.onmessage = (event) => {
