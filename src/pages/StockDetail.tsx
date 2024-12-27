@@ -22,11 +22,16 @@ const StockDetail: React.FC = () => {
   //parsing recieved data from websocket
   useEffect(() => {
     if (stock) {
-      const symbolMessage = messages[stockSymbol];
+      let symbolMessage;
+      if (/^[A-Za-z]/.test(stockSymbol)) {
+        symbolMessage = messages["DNAS" + stockSymbol];
+      } else {
+        symbolMessage = messages[stockSymbol];
+      }
       setRealtimeData(symbolMessage);
 
       const lastMessage: StructuredDataType =
-        symbolMessage[symbolMessage?.length - 1];
+        symbolMessage[symbolMessage?.length - 1 || 0];
 
       const newStockData: StockData = {
         ...stock,
@@ -84,11 +89,10 @@ const StockDetail: React.FC = () => {
   }, [isConnected, stockSymbol, location.pathname]);
 
   const handleBuy = async () => {
-    // if (!token) {
-    //   alert("로그인 후 이용해주세요");
-    //   return;
-    // }
-
+    if (!token) {
+      alert("로그인 후 이용해주세요");
+      return;
+    }
     await axios.post(
       `${import.meta.env.VITE_BACK_BASE_URL}/stock/buy`,
       {
@@ -99,6 +103,7 @@ const StockDetail: React.FC = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        withCredentials: true,
       }
     );
     alert(`Successfully bought ${quantity} shares of ${stock?.symbol}`);
@@ -133,16 +138,16 @@ const StockDetail: React.FC = () => {
           <div className="flex flex-col items-start justify-between mb-6 sm:flex-row sm:items-center">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                {stock.name}
+                {stock.name || ""}
               </h1>
               <p className="text-sm sm:text-base text-gray-500">
-                Symbol: {stock.symbol}
+                Symbol: {stock.symbol || ""}
               </p>
             </div>
             <div className="mt-4 sm:mt-0">
               <p className="text-lg sm:text-xl font-semibold text-blue-500">
                 Current Price: {currentSymbol}
-                {stock.price}
+                {stock.price || ""}
               </p>
             </div>
           </div>
@@ -165,14 +170,14 @@ const StockDetail: React.FC = () => {
               <p className="text-sm text-gray-500">Day Low</p>
               <p className="text-base sm:text-lg font-semibold text-gray-800">
                 {currentSymbol}
-                {stock.low}
+                {stock.low || ""}
               </p>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg shadow">
               <p className="text-sm text-gray-500">Day High</p>
               <p className="text-base sm:text-lg font-semibold text-gray-800">
                 {currentSymbol}
-                {stock.high}
+                {stock.high || ""}
               </p>
             </div>
           </div>
@@ -186,7 +191,7 @@ const StockDetail: React.FC = () => {
               <span className="shrink-0 mr-4">Current price: </span>
               <span className="m-0 w-full sm:w-1/3">
                 {currentSymbol}
-                {stock.price}
+                {stock.price || ""}
               </span>
             </div>
             <div className="flex flex-wrap items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -260,12 +265,14 @@ const StockDetail: React.FC = () => {
                   key={index}
                   className="bg-gray-50 p-2 rounded-lg shadow-sm border"
                 >
-                  <p className="text-xs text-gray-500">Time: {data.time}</p>
-                  <p className="text-xs text-gray-800 font-semibold">
-                    Price: {data.currentPrice}
+                  <p className="text-xs text-gray-500">
+                    Time: {data.time || ""}
                   </p>
                   <p className="text-xs text-gray-800 font-semibold">
-                    Volume: {data.volume}
+                    Price: {data.currentPrice || ""}
+                  </p>
+                  <p className="text-xs text-gray-800 font-semibold">
+                    Volume: {data.volume || ""}
                   </p>
                 </div>
               ))}

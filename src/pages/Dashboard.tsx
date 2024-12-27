@@ -1,46 +1,35 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 interface Trade {
   symbol: string;
-  name: string;
-  quantity: number;
-  averagePrice: number;
-  currentPrice: number;
+  amount: number;
+  average: number;
 }
 
 const Dashboard: React.FC = () => {
-  const portfolio: Trade[] = [
-    {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      quantity: 10,
-      averagePrice: 145.0,
-      currentPrice: 150.0,
-    },
-    {
-      symbol: "GOOGL",
-      name: "GOOGL Inc.",
-      quantity: 5,
-      averagePrice: 700.0,
-      currentPrice: 720.0,
-    },
-    {
-      symbol: "AMZN",
-      name: "Amazon.com Inc.",
-      quantity: 8,
-      averagePrice: 3350.0,
-      currentPrice: 3400.0,
-    },
-  ];
   const { token } = useAuth();
+
+  const [stockList, setStockList] = useState<Trade[]>([]);
 
   const calculateProfitLoss = (averagePrice: number, currentPrice: number) => {
     return ((currentPrice - averagePrice) / averagePrice) * 100;
   };
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) return;
+    axios
+      .get(`${import.meta.env.VITE_BACK_BASE_URL}/stock/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(({ data }) => setStockList(data));
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -82,10 +71,11 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {portfolio.map((trade) => {
+              {stockList.map((trade) => {
                 const profitLoss = calculateProfitLoss(
-                  trade.averagePrice,
-                  trade.currentPrice
+                  trade.average,
+                  //trade.currentPrice
+                  trade.average
                 );
                 return (
                   <tr
@@ -94,19 +84,19 @@ const Dashboard: React.FC = () => {
                     onClick={() => navigate(`/detail?id=${trade.symbol}`)}
                   >
                     <td className="p-4 text-left text-sm text-gray-800 border-b">
-                      {trade.name}
+                      {trade.symbol}
                     </td>
                     <td className="p-4 text-left text-sm text-gray-800 border-b">
                       {trade.symbol}
                     </td>
                     <td className="p-4 text-right text-sm text-gray-800 border-b">
-                      {trade.quantity}
+                      {trade.amount}
                     </td>
                     <td className="p-4 text-right text-sm text-gray-800 border-b">
-                      ${trade.averagePrice.toFixed(2)}
+                      ${trade.average.toFixed(2)}
                     </td>
                     <td className="p-4 text-right text-sm text-gray-800 border-b">
-                      ${trade.currentPrice.toFixed(2)}
+                      ${trade.average.toFixed(2)}
                     </td>
                     <td
                       className={`p-4 text-right text-sm font-semibold border-b ${
@@ -123,10 +113,10 @@ const Dashboard: React.FC = () => {
 
           {/* Responsive cards for small screens */}
           <div className="md:hidden grid gap-4">
-            {portfolio.map((trade) => {
+            {stockList.map((trade) => {
               const profitLoss = calculateProfitLoss(
-                trade.averagePrice,
-                trade.currentPrice
+                trade.average,
+                trade.average
               );
               return (
                 <div
@@ -135,16 +125,16 @@ const Dashboard: React.FC = () => {
                   onClick={() => navigate(`/detail?id=${trade.symbol}`)}
                 >
                   <h3 className="text-lg font-bold text-gray-800">
-                    {trade.name} ({trade.symbol})
+                    {trade.symbol} ({trade.symbol})
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Quantity: {trade.quantity}
+                    Quantity: {trade.amount}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Avg. Price: ${trade.averagePrice.toFixed(2)}
+                    Avg. Price: ${trade.average.toFixed(2)}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Current Price: ${trade.currentPrice.toFixed(2)}
+                    Current Price: ${trade.average.toFixed(2)}
                   </p>
                   <p
                     className={`text-sm font-semibold ${

@@ -55,24 +55,35 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
           const symbol = metas[3];
           const type = metas[1];
 
+          //국내주식 실시간체결가 parsing
           if (type === "H0STCNT0") {
             return {
-              symbol: symbol,
+              symbol,
               responseStatus: meta,
+              //현재가
               currentPrice: data[2],
+              //최고가
               high: data[8],
+              //최저가
               low: data[9],
+              //거래량
               volume: data[12],
+              //체결 시간
               time: data[1],
             };
           } else {
             return {
-              symbol: "a",
+              symbol,
               responseStatus: data[0],
-              currentPrice: data[12],
+              //현재가
+              currentPrice: data[11],
+              //최고가
               high: data[9],
+              //최저가
               low: data[10],
+              //거래량
               volume: data[20],
+              //체결 한국시간
               time: data[7],
             };
           }
