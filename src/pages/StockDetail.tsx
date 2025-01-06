@@ -15,6 +15,7 @@ const StockDetail: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
+  const [chartData, setChartData] = useState([]);
 
   const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
@@ -51,6 +52,10 @@ const StockDetail: React.FC = () => {
     axios
       .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
       .then(({ data }: { data: StockData }) => setStock(data));
+
+    axios
+      .get(`${backUrl}/stockApi/chartData?SYMB=${stockSymbol}`)
+      .then(({ data }: { data: StockChartData }) => setChartData(data));
   }, []);
 
   //select current symbol after stock data is fetched
@@ -131,21 +136,6 @@ const StockDetail: React.FC = () => {
     alert(`Successfully sold ${quantity} shares of ${stock?.symbol}`);
   };
 
-  const stockData: StockChartData[] = [
-    { date: "2025-01-01", open: 150, high: 160, low: 145, close: 155 },
-    { date: "2025-01-02", open: 155, high: 165, low: 150, close: 160 },
-    { date: "2025-01-03", open: 160, high: 170, low: 155, close: 165 },
-    { date: "2025-01-04", open: 165, high: 175, low: 160, close: 170 },
-    { date: "2025-01-05", open: 150, high: 160, low: 145, close: 155 },
-    { date: "2025-01-06", open: 155, high: 165, low: 150, close: 160 },
-    { date: "2025-01-07", open: 160, high: 170, low: 155, close: 165 },
-    { date: "2025-01-08", open: 165, high: 175, low: 160, close: 170 },
-    { date: "2025-01-09", open: 150, high: 160, low: 145, close: 155 },
-    { date: "2025-01-10", open: 155, high: 165, low: 150, close: 160 },
-    { date: "2025-01-11", open: 160, high: 170, low: 155, close: 165 },
-    { date: "2025-01-12", open: 165, high: 175, low: 160, close: 170 },
-  ];
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-20 px-4 sm:px-8">
       {stock ? (
@@ -169,12 +159,12 @@ const StockDetail: React.FC = () => {
           </div>
 
           {/* Stock Chart */}
-          <div className="mb-6">
+          <div className="mb-20">
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-4">
               Stock Chart
             </h2>
-            <div className="w-full h-48 sm:h-64 bg-gray-100 flex items-center justify-center rounded-lg">
-              <CandleChart data={stockData} />
+            <div className="w-full h-auto bg-gray-100 flex items-center justify-center rounded-lg">
+              <CandleChart data={chartData} />
             </div>
           </div>
 
