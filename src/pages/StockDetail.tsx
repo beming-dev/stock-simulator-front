@@ -18,13 +18,29 @@ const StockDetail: React.FC = () => {
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
   const [chartData, setChartData] = useState([]);
   const [isFavorite, setIsFavorite] = useState<boolean>(false); // 즐겨찾기 상태
+
   const toggleFavorite = () => {
-    setIsFavorite((prev) => !prev);
-    if (!isFavorite) {
-      alert(`${stock?.name || ""} has been added to your favorites.`);
-    } else {
-      alert(`${stock?.name || ""} has been removed from your favorites.`);
+    if (!token) {
+      console.log("no token");
+      return;
     }
+    axios
+      .post(
+        `${import.meta.env.VITE_BACK_BASE_URL}/stock/like`,
+        {
+          symbol: stockSymbol,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      )
+      .then(() => alert("success"))
+      .catch(() => alert("fail"));
+
+    setIsFavorite((prev) => !prev);
   };
   const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
