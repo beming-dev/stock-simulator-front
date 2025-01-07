@@ -6,6 +6,7 @@ import axios from "axios";
 import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import { useAuth } from "../context/AuthContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -16,7 +17,15 @@ const StockDetail: React.FC = () => {
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
   const [chartData, setChartData] = useState([]);
-
+  const [isFavorite, setIsFavorite] = useState<boolean>(false); // 즐겨찾기 상태
+  const toggleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+    if (!isFavorite) {
+      alert(`${stock?.name || ""} has been added to your favorites.`);
+    } else {
+      alert(`${stock?.name || ""} has been removed from your favorites.`);
+    }
+  };
   const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
   const location = useLocation();
@@ -150,11 +159,19 @@ const StockDetail: React.FC = () => {
                 Symbol: {stock.symbol || ""}
               </p>
             </div>
-            <div className="mt-4 sm:mt-0">
+
+            <div className="mt-4 sm:mt-0 flex">
               <p className="text-lg sm:text-xl font-semibold text-blue-500">
                 Current Price: {currentSymbol}
                 {stock.price || ""}
               </p>
+              {/* 즐겨찾기 버튼 */}
+              <div
+                onClick={toggleFavorite}
+                className="cursor-pointer text-yellow-500 text-2xl sm:text-3xl ml-4"
+              >
+                {isFavorite ? <FaStar /> : <FaRegStar />}
+              </div>
             </div>
           </div>
 
