@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import StockChart from "../components/StockChart";
+// import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
 import axios from "axios";
 import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import { useAuth } from "../context/AuthContext";
+import CandleChart, { StockChartData } from "../components/CandleChart";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -14,7 +16,32 @@ const StockDetail: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
+  const [chartData, setChartData] = useState([]);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false); // 즐겨찾기 상태
 
+  const toggleFavorite = () => {
+    if (!token) {
+      console.log("no token");
+      return;
+    }
+    axios
+      .post(
+        `${import.meta.env.VITE_BACK_BASE_URL}/stock/like`,
+        {
+          symbol: stockSymbol,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      )
+      .then(() => alert("success"))
+      .catch(() => alert("fail"));
+
+    setIsFavorite((prev) => !prev);
+  };
   const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
   const location = useLocation();
@@ -50,6 +77,10 @@ const StockDetail: React.FC = () => {
     axios
       .get(`${backUrl}/stockApi/currentPrice?SYMB=${stockSymbol}`)
       .then(({ data }: { data: StockData }) => setStock(data));
+
+    axios
+      .get(`${backUrl}/stockApi/chartData?SYMB=${stockSymbol}`)
+      .then(({ data }: { data: StockChartData }) => setChartData(data));
   }, []);
 
   //select current symbol after stock data is fetched
@@ -144,23 +175,29 @@ const StockDetail: React.FC = () => {
                 Symbol: {stock.symbol || ""}
               </p>
             </div>
-            <div className="mt-4 sm:mt-0">
+
+            <div className="mt-4 sm:mt-0 flex">
               <p className="text-lg sm:text-xl font-semibold text-blue-500">
                 Current Price: {currentSymbol}
                 {stock.price || ""}
               </p>
+              {/* 즐겨찾기 버튼 */}
+              <div
+                onClick={toggleFavorite}
+                className="cursor-pointer text-yellow-500 text-2xl sm:text-3xl ml-4"
+              >
+                {isFavorite ? <FaStar /> : <FaRegStar />}
+              </div>
             </div>
           </div>
 
           {/* Stock Chart */}
-          <div className="mb-6">
+          <div className="mb-20">
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-4">
               Stock Chart
             </h2>
-            <div className="w-full h-48 sm:h-64 bg-gray-100 flex items-center justify-center rounded-lg">
-              <div className="text-gray-500">
-                <StockChart />
-              </div>
+            <div className="w-full h-auto bg-gray-100 flex items-center justify-center rounded-lg">
+              <CandleChart data={chartData} />
             </div>
           </div>
 
