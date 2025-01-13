@@ -6,7 +6,8 @@ import axios from "axios";
 import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import { useAuth } from "../context/AuthContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
-import { FaRegStar, FaStar } from "react-icons/fa";
+import Star from "../components/Star";
+import axiosWithToken from "../utils/customAxios";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -17,31 +18,7 @@ const StockDetail: React.FC = () => {
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
   const [chartData, setChartData] = useState([]);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false); // 즐겨찾기 상태
 
-  const toggleFavorite = () => {
-    if (!token) {
-      console.log("no token");
-      return;
-    }
-    axios
-      .post(
-        `${import.meta.env.VITE_BACK_BASE_URL}/stock/like`,
-        {
-          symbol: stockSymbol,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      )
-      .then(() => alert("success"))
-      .catch(() => alert("fail"));
-
-    setIsFavorite((prev) => !prev);
-  };
   const { sendMessage, messages, isConnected } = useWebSocket();
   const { token } = useAuth();
   const location = useLocation();
@@ -124,19 +101,10 @@ const StockDetail: React.FC = () => {
       alert("로그인 후 이용해주세요");
       return;
     }
-    await axios.post(
-      `${import.meta.env.VITE_BACK_BASE_URL}/stock/buy`,
-      {
-        symbol: stockSymbol,
-        amount: quantity,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+    await axiosWithToken.post("/stock/buy", {
+      symbol: stockSymbol,
+      amount: quantity,
+    });
     alert(`Successfully bought ${quantity} shares of ${stock?.symbol}`);
   };
 
@@ -145,19 +113,10 @@ const StockDetail: React.FC = () => {
       alert("로그인 후 이용해주세요");
       return;
     }
-    await axios.post(
-      `${import.meta.env.VITE_BACK_BASE_URL}/stock/sell`,
-      {
-        symbol: stockSymbol,
-        amount: quantity,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+    await axiosWithToken.post("/stock/sell", {
+      symbol: stockSymbol,
+      amount: quantity,
+    });
     alert(`Successfully sold ${quantity} shares of ${stock?.symbol}`);
   };
 
@@ -181,13 +140,7 @@ const StockDetail: React.FC = () => {
                 Current Price: {currentSymbol}
                 {stock.price || ""}
               </p>
-              {/* 즐겨찾기 버튼 */}
-              <div
-                onClick={toggleFavorite}
-                className="cursor-pointer text-yellow-500 text-2xl sm:text-3xl ml-4"
-              >
-                {isFavorite ? <FaStar /> : <FaRegStar />}
-              </div>
+              <Star stockSymbol={stockSymbol} />
             </div>
           </div>
 
