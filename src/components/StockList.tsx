@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 interface Stock {
   symb: string;
@@ -10,17 +9,39 @@ interface Stock {
   last: string;
 }
 
+const StockItem = (stock: Stock) => {
+  return (
+    <Link to={`/detail?id=${stock.symb}`} key={stock.symb}>
+      <div
+        key={stock.symb}
+        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-200"
+      >
+        <h4 className="text-lg font-bold text-gray-800">{stock.name}</h4>
+        <span className="font-bold text-gray-700 mt-2">({stock.symb})</span>
+        <p className="text-gray-600 mt-2">
+          {stock.last}\{" "}
+          <span
+            className={`font-bold ${
+              stock.rate.substring(0, 1) === "-"
+                ? "text-blue-500"
+                : "text-red-500"
+            }`}
+          >
+            ({stock.rate}%)
+          </span>
+        </p>
+      </div>
+    </Link>
+  );
+};
+
 const StockList: React.FC = () => {
   const [korStocks, setKorStocks] = useState<Stock[]>([]);
   const [nasStocks, setNasStocks] = useState<Stock[]>([]);
-  const { token } = useAuth();
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_BACK_BASE_URL}/stockApi/mainList`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         withCredentials: true,
       })
       .then(({ data }) => {
@@ -32,46 +53,16 @@ const StockList: React.FC = () => {
 
   return (
     <div className="flex gap-10">
-      <div className="flex-1">
+      <div className="flex-1 shrink-0">
         <h3 className="text-xl font-semibold mb-4">Korea Top Volume</h3>
         <div className="flex flex-col gap-3">
-          {korStocks.map((stock) => (
-            <Link to={`/detail?id=${stock.symb}`} key={stock.symb}>
-              <div
-                key={stock.symb}
-                className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-200"
-              >
-                <h4 className="text-lg font-bold text-gray-800">
-                  {stock.name}
-                </h4>
-                <span className="font-bold text-gray-700 mt-2">
-                  ({stock.symb})
-                </span>
-                <p className="text-gray-600 mt-2">{stock.last}\</p>
-              </div>
-            </Link>
-          ))}
+          {korStocks.map((stock) => StockItem(stock))}
         </div>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 shrink-0">
         <h3 className="text-xl font-semibold mb-4">Nasdaq Top Volume</h3>
         <div className="flex flex-col gap-3">
-          {nasStocks.map((stock) => (
-            <Link to={`/detail?id=${stock.symb}`} key={stock.symb}>
-              <div
-                key={stock.symb}
-                className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-200"
-              >
-                <h4 className="text-lg font-bold text-gray-800">
-                  {stock.name}
-                </h4>
-                <span className="font-bold text-gray-700 mt-2">
-                  ({stock.symb})
-                </span>
-                <p className="text-gray-600 mt-2">${stock.last}</p>
-              </div>
-            </Link>
-          ))}
+          {nasStocks.map((stock) => StockItem(stock))}
         </div>
       </div>
     </div>
