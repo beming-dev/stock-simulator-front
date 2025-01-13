@@ -3,11 +3,12 @@ import { useLocation, useSearchParams } from "react-router-dom";
 // import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
 import axios from "axios";
-import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
+import { useWebSocket } from "../context/WebSocketContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
 import Star from "../components/Star";
 import BuyBtn from "../components/BuyBtn";
 import SellBtn from "../components/SellBtn";
+import StockVolume from "../components/StockVolume";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -16,36 +17,10 @@ const StockDetail: React.FC = () => {
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
-  const [realtimeData, setRealtimeData] = useState<StructuredDataType[]>([]);
   const [chartData, setChartData] = useState([]);
 
   const { sendMessage, messages, isConnected } = useWebSocket();
   const location = useLocation();
-
-  //parsing recieved data from websocket
-  useEffect(() => {
-    if (stock) {
-      let symbolMessage;
-      if (/^[A-Za-z]/.test(stockSymbol)) {
-        symbolMessage = messages["DNAS" + stockSymbol];
-      } else {
-        symbolMessage = messages[stockSymbol];
-      }
-      setRealtimeData(symbolMessage);
-
-      const lastMessage: StructuredDataType =
-        symbolMessage[symbolMessage?.length - 1 || 0];
-
-      const newStockData: StockData = {
-        ...stock,
-        price: parseInt(lastMessage.currentPrice),
-        high: parseInt(lastMessage.high),
-        low: parseInt(lastMessage.low),
-      };
-
-      setStock(newStockData);
-    }
-  }, [messages]);
 
   //get current stock price when user enter this page
   useEffect(() => {
@@ -173,66 +148,15 @@ const StockDetail: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* Volume Section */}
-          <div className="mt-20">
-            <h2 className="text-md sm:text-lg font-bold text-gray-700 mb-2">
-              Trading Volume
-            </h2>
-            {/* Table for large screens */}
-            <div className="hidden sm:block border border-gray-200 rounded-lg">
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-100 sticky top-0">
-                  <tr>
-                    <th className="p-2 text-left text-xs font-semibold text-gray-600">
-                      Time
-                    </th>
-                    <th className="p-2 text-right text-xs font-semibold text-gray-600">
-                      Price
-                    </th>
-                    <th className="p-2 text-right text-xs font-semibold text-gray-600">
-                      Volume
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {realtimeData.reverse().map((data, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="p-2 text-left text-xs text-gray-800">
-                        {data.time}
-                      </td>
-                      <td className="p-2 text-right text-xs text-gray-800">
-                        {currentSymbol}
-                        {parseFloat(data.currentPrice).toFixed(2)}
-                      </td>
-                      <td className="p-2 text-right text-xs text-gray-800">
-                        {parseInt(data.volume, 10).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
 
-            {/* Cards for small screens */}
-            <div className="sm:hidden grid gap-2 overflow-y-auto max-h-64">
-              {realtimeData.reverse().map((data, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 p-2 rounded-lg shadow-sm border"
-                >
-                  <p className="text-xs text-gray-500">
-                    Time: {data.time || ""}
-                  </p>
-                  <p className="text-xs text-gray-800 font-semibold">
-                    Price: {data.currentPrice || ""}
-                  </p>
-                  <p className="text-xs text-gray-800 font-semibold">
-                    Volume: {data.volume || ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Volume Section */}
+          <StockVolume
+            stockSymbol={stockSymbol}
+            stock={stock}
+            setStock={setStock}
+            currentSymbol={currentSymbol}
+            messages={messages}
+          />
         </div>
       ) : (
         <div className="text-center">

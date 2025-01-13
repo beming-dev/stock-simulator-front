@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { FaRegStar, FaStar } from "react-icons/fa";
-import axios from "axios";
 import axiosWithToken from "../utils/customAxios";
 
 interface StarProps {
