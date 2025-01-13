@@ -4,10 +4,10 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { StockData } from "../type/type";
 import axios from "axios";
 import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
-import { useAuth } from "../context/AuthContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
 import Star from "../components/Star";
-import axiosWithToken from "../utils/customAxios";
+import BuyBtn from "../components/BuyBtn";
+import SellBtn from "../components/SellBtn";
 
 const StockDetail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -20,7 +20,6 @@ const StockDetail: React.FC = () => {
   const [chartData, setChartData] = useState([]);
 
   const { sendMessage, messages, isConnected } = useWebSocket();
-  const { token } = useAuth();
   const location = useLocation();
 
   //parsing recieved data from websocket
@@ -96,30 +95,6 @@ const StockDetail: React.FC = () => {
     };
   }, [isConnected, stockSymbol, location.pathname]);
 
-  const handleBuy = async () => {
-    if (!token) {
-      alert("로그인 후 이용해주세요");
-      return;
-    }
-    await axiosWithToken.post("/stock/buy", {
-      symbol: stockSymbol,
-      amount: quantity,
-    });
-    alert(`Successfully bought ${quantity} shares of ${stock?.symbol}`);
-  };
-
-  const handleSell = async () => {
-    if (!token) {
-      alert("로그인 후 이용해주세요");
-      return;
-    }
-    await axiosWithToken.post("/stock/sell", {
-      symbol: stockSymbol,
-      amount: quantity,
-    });
-    alert(`Successfully sold ${quantity} shares of ${stock?.symbol}`);
-  };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-20 px-4 sm:px-8">
       {stock ? (
@@ -193,18 +168,8 @@ const StockDetail: React.FC = () => {
                 className="w-full sm:w-1/3 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <div className="flex w-full sm:w-auto justify-between space-x-4">
-                <button
-                  onClick={handleBuy}
-                  className="flex-1 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition"
-                >
-                  Buy
-                </button>
-                <button
-                  onClick={handleSell}
-                  className="flex-1 bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
-                >
-                  Sell
-                </button>
+                <BuyBtn stockSymbol={stockSymbol} quantity={quantity} />
+                <SellBtn stockSymbol={stockSymbol} quantity={quantity} />
               </div>
             </div>
           </div>
