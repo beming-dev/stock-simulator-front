@@ -58,8 +58,8 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
     const yScale = d3
       .scaleLinear()
       .domain([
-        d3.min(formattedData, (d) => d.low)! - 10,
-        d3.max(formattedData, (d) => d.high)! + 10,
+        d3.min(formattedData, (d) => d.low)! * 0.99, // 최저값에 5% 여유 추가
+        d3.max(formattedData, (d) => d.high)! * 1.01, // 최고값에 5% 여유 추가
       ])
       .range([height, 0]);
 
