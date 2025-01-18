@@ -27,7 +27,7 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
 
     // SVG 설정
     const svg = d3
-      .select(svgRef.current)
+      .select(svgRef.current as SVGSVGElement)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.bottom + margin.top);
 
@@ -121,7 +121,7 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
 
     // ✅ Zoom & Pan 기능 추가
     const zoom: any = d3
-      .zoom()
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 1]) // 확대/축소 비활성화
       .translateExtent([
         [0, 0],
