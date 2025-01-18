@@ -128,7 +128,7 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
         [width * 2, height + margin.bottom + margin.top],
       ])
       .on("zoom", (event) => {
-        chart.attr("transform", event.transform);
+        chart.attr("transform", event.transform as any);
       });
 
     // ✅ 차트 로드 시 기본 위치를 맨 오른쪽으로 이동
@@ -140,7 +140,7 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
     );
     svg.call(zoom.transform, initialTransform);
 
-    svg.call(zoom);
+    svg.call(zoom as any);
   }, [data]);
 
   return (
