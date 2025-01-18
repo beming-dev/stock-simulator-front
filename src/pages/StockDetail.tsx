@@ -17,7 +17,7 @@ const StockDetail: React.FC = () => {
   const [stock, setStock] = useState<StockData | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<StockChartData[]>([]);
 
   const { sendMessage, messages, isConnected } = useWebSocket();
   const location = useLocation();
@@ -31,7 +31,7 @@ const StockDetail: React.FC = () => {
 
     axios
       .get(`${backUrl}/stockApi/chartData?SYMB=${stockSymbol}`)
-      .then(({ data }: { data: StockChartData }) => setChartData(data));
+      .then(({ data }: { data: StockChartData[] }) => setChartData(data));
   }, []);
 
   //select current symbol after stock data is fetched

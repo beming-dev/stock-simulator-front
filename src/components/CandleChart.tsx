@@ -120,7 +120,7 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
       .attr("stroke", "#555");
 
     // ✅ Zoom & Pan 기능 추가
-    const zoom = d3
+    const zoom: any = d3
       .zoom()
       .scaleExtent([1, 1]) // 확대/축소 비활성화
       .translateExtent([
