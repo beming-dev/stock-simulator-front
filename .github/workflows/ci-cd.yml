@@ -31,10 +31,10 @@ jobs:
     - name: Checkout infra repo
       uses: actions/checkout@v3
       with:
-        repository: myorg/infra-repo
+        repository: beming-dev/stock-simulator-cicd
         token: ${{ secrets.INFRA_TOKEN }}
         path: infra
-        persist-credentials: false
+        persist-credentials: true
 
     - name: Update Kustomize image tag
       run: |
