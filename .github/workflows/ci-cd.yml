@@ -38,7 +38,7 @@ jobs:
 
       - name: Update Kustomize image tag
         run: |
-          cd base/frontend
+          cd infra/base/frontend
 
           REPO_NAME=${{ github.event.repository.name }}
           IMAGE_NAME="beming/${REPO_NAME}"
