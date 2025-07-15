@@ -1,1 +1,3 @@
 # stock-simulator-frontend
+
+cicd
