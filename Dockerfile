@@ -34,7 +34,7 @@ COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Nginx가 3000 포트로 서비스
-EXPOSE 3001
+EXPOSE 5173
 
 # Nginx 시작
 CMD ["nginx", "-g", "daemon off;"]
