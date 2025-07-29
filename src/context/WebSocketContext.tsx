@@ -82,7 +82,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
               //최저가
               low: data[10],
               //거래량
-              volume: data[20],
+              volume: data[19],
               //체결 한국시간
               time: data[7],
             };
