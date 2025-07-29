@@ -138,7 +138,7 @@ const StockDetail: React.FC = () => {
             <div className="mt-4 sm:mt-0 flex">
               <p className="text-lg sm:text-xl font-semibold text-blue-500">
                 Current Price: {currentSymbol}
-                {stock.price || ""}
+                {parseFloat(stock?.price.toString()).toFixed(2) || ""}
               </p>
               <Star stockSymbol={stockSymbol} />
             </div>

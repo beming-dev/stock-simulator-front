@@ -14,17 +14,6 @@ interface CandleChartProps {
 }
 
 const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
-  // 50개만 보이도록 데이터의 최신 50개 기준으로 x축 범위 계산
-  const sortedData = [...data].sort(
-    (a, b) => parseApexDate(a.date) - parseApexDate(b.date)
-  );
-  const last50 = sortedData.slice(-50);
-  const minX = last50.length > 0 ? parseApexDate(last50[0].date) : undefined;
-  const maxX =
-    last50.length > 0
-      ? parseApexDate(last50[last50.length - 1].date)
-      : undefined;
-
   const series = [
     {
       data: data.map((d) => ({
@@ -49,8 +38,6 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
     xaxis: {
       type: "datetime",
       labels: { datetimeUTC: false },
-      min: minX,
-      max: maxX,
     },
     yaxis: {
       tooltip: { enabled: true },

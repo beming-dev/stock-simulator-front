@@ -36,9 +36,9 @@ const StockVolume: React.FC<VolumeProps> = ({
 
       const newStockData: StockData = {
         ...stock,
-        price: parseFloat(parseFloat(lastMessage.currentPrice).toFixed(2)),
-        high: parseFloat(parseFloat(lastMessage.high).toFixed(2)),
-        low: parseFloat(parseFloat(lastMessage.low).toFixed(2)),
+        price: parseFloat(lastMessage.currentPrice),
+        high: parseFloat(lastMessage.high),
+        low: parseFloat(lastMessage.low),
       };
 
       setStock(newStockData);
