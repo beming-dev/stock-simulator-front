@@ -36,9 +36,9 @@ const StockVolume: React.FC<VolumeProps> = ({
 
       const newStockData: StockData = {
         ...stock,
-        price: parseInt(lastMessage.currentPrice),
-        high: parseInt(lastMessage.high),
-        low: parseInt(lastMessage.low),
+        price: parseFloat(parseFloat(lastMessage.currentPrice).toFixed(2)),
+        high: parseFloat(parseFloat(lastMessage.high).toFixed(2)),
+        low: parseFloat(parseFloat(lastMessage.low).toFixed(2)),
       };
 
       setStock(newStockData);
@@ -67,20 +67,26 @@ const StockVolume: React.FC<VolumeProps> = ({
             </tr>
           </thead>
           <tbody>
-            {realtimeData.reverse().map((data, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="p-2 text-left text-xs text-gray-800">
-                  {data.time}
-                </td>
-                <td className="p-2 text-right text-xs text-gray-800">
-                  {currentSymbol}
-                  {parseFloat(data.currentPrice).toFixed(2)}
-                </td>
-                <td className="p-2 text-right text-xs text-gray-800">
-                  {parseInt(data.volume, 10).toLocaleString()}
-                </td>
-              </tr>
-            ))}
+            {realtimeData.reverse().map((data, index) => {
+              const formattedTime = `${data.time.slice(0, 2)}:${data.time.slice(
+                2,
+                4
+              )}:${data.time.slice(4, 6)}`;
+              return (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="p-2 text-left text-xs text-gray-800">
+                    {formattedTime}
+                  </td>
+                  <td className="p-2 text-right text-xs text-gray-800">
+                    {currentSymbol}
+                    {parseFloat(data.currentPrice).toFixed(2)}
+                  </td>
+                  <td className="p-2 text-right text-xs text-gray-800">
+                    {parseInt(data.volume, 10).toLocaleString()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

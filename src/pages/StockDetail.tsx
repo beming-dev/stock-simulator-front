@@ -3,7 +3,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 // import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
 import axios from "axios";
-import { useWebSocket } from "../context/WebSocketContext";
+import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
 import Star from "../components/Star";
 import BuyBtn from "../components/BuyBtn";
@@ -69,6 +69,56 @@ const StockDetail: React.FC = () => {
       window.addEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isConnected, stockSymbol, location.pathname]);
+
+  useEffect(() => {
+    if (stock) {
+      let symbolMessage;
+      if (/^[A-Za-z]/.test(stockSymbol)) {
+        symbolMessage = messages["DNAS" + stockSymbol];
+      } else {
+        symbolMessage = messages[stockSymbol];
+      }
+      if (!symbolMessage) return;
+
+      const lastMessage: StructuredDataType =
+        symbolMessage[symbolMessage?.length - 1 || 0];
+      const lastChartData = chartData[0];
+
+      const hhmm = lastChartData.date.slice(-6, -2);
+      const yymmdd = lastChartData.date.slice(0, 8);
+      const newhhmm = lastMessage.time.slice(-6, -2);
+
+      if (hhmm == newhhmm) {
+        const newChartData = {
+          ...lastChartData,
+          date: yymmdd + newhhmm + "00",
+          high:
+            lastChartData.high > lastMessage.currentPrice
+              ? lastChartData.high
+              : lastMessage.currentPrice,
+          low:
+            lastChartData.low < lastMessage.currentPrice
+              ? lastChartData.low
+              : lastMessage.currentPrice,
+          close: lastMessage.currentPrice,
+        };
+
+        const updatedChartData = [...chartData];
+        updatedChartData[0] = newChartData;
+        setChartData((chartData: any) => updatedChartData);
+      } else {
+        const newChartData = {
+          ...lastChartData,
+          date: yymmdd + newhhmm + "00",
+          high: lastMessage.currentPrice,
+          low: lastMessage.currentPrice,
+          open: lastMessage.currentPrice,
+          close: lastMessage.currentPrice,
+        };
+        setChartData((chartData: any) => [newChartData, ...chartData]);
+      }
+    }
+  }, [messages]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-20 px-4 sm:px-8">

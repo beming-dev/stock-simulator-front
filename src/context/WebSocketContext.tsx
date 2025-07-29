@@ -40,7 +40,6 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const connectWebSocket = () => {
       const socketURL = import.meta.env.VITE_SOCKET_URL;
-      console.log(socketURL)
       webSocket.current = new WebSocket(socketURL);
 
       webSocket.current.onopen = () => {
