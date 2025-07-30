@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 // import StockChart from "../components/StockChart";
 import { StockData } from "../type/type";
@@ -10,7 +10,7 @@ import BuyBtn from "../components/BuyBtn";
 import SellBtn from "../components/SellBtn";
 import StockVolume from "../components/StockVolume";
 
-const StockDetail: React.FC = () => {
+const StockDetail: React.FC = React.memo(() => {
   const [searchParams] = useSearchParams();
   const stockSymbol: string = searchParams.get("id") || "AAPL";
 
@@ -21,6 +21,78 @@ const StockDetail: React.FC = () => {
 
   const { sendMessage, messages, isConnected } = useWebSocket();
   const location = useLocation();
+
+  // 성능 최적화를 위한 ref들
+  const isVisible = useRef<boolean>(true);
+  const pendingMessagesRef = useRef<StructuredDataType[]>([]);
+  const chartDataRef = useRef<StockChartData[]>([]);
+
+  // 차트 데이터 ref 업데이트
+  useEffect(() => {
+    chartDataRef.current = chartData;
+  }, [chartData]);
+
+  // 컴포넌트 최상단에 추가 - 성능 최적화된 메시지 처리
+  const processMessage = useCallback((lastMessage: StructuredDataType) => {
+    if (!chartDataRef.current.length) return;
+
+    const lastChart = chartDataRef.current[0];
+    const hhmm = lastChart.date.slice(-6, -2);
+    const yymmdd = lastChart.date.slice(0, 8);
+    const newhhmm = lastMessage.time.slice(-6, -2);
+
+    const currentPrice = parseFloat(lastMessage.currentPrice);
+    const lastHigh = parseFloat(lastChart.high);
+    const lastLow = parseFloat(lastChart.low);
+
+    if (hhmm === newhhmm) {
+      // 같은 분 안에서 업데이트
+      const updated = {
+        ...lastChart,
+        date: yymmdd + newhhmm + "00",
+        high: Math.max(lastHigh, currentPrice).toString(),
+        low: Math.min(lastLow, currentPrice).toString(),
+        close: lastMessage.currentPrice,
+      };
+      setChartData((cd) => {
+        const copy = [...cd];
+        copy[0] = updated;
+        return copy;
+      });
+    } else {
+      // 새로운 분이 시작됐을 때
+      const newData = {
+        ...lastChart,
+        date: yymmdd + newhhmm + "00",
+        open: lastMessage.currentPrice,
+        high: lastMessage.currentPrice,
+        low: lastMessage.currentPrice,
+        close: lastMessage.currentPrice,
+      };
+      setChartData((cd) => [newData, ...cd.slice(0, 99)]); // 최대 100개만 유지
+    }
+  }, []);
+
+  // 가시성 변경 처리 - 성능 최적화
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      const isNowVisible = document.visibilityState === "visible";
+      isVisible.current = isNowVisible;
+
+      if (isNowVisible && pendingMessagesRef.current.length > 0) {
+        // 가장 최신 메시지만 처리하여 성능 향상
+        const latestMessage =
+          pendingMessagesRef.current[pendingMessagesRef.current.length - 1];
+        processMessage(latestMessage);
+        pendingMessagesRef.current = []; // 비우기
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [processMessage]);
 
   //get current stock price when user enter this page
   useEffect(() => {
@@ -66,59 +138,33 @@ const StockDetail: React.FC = () => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       handleBeforeUnload();
-      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isConnected, stockSymbol, location.pathname]);
 
+  // 메시지 처리 - 성능 최적화
   useEffect(() => {
-    if (stock) {
-      let symbolMessage;
-      if (/^[A-Za-z]/.test(stockSymbol)) {
-        symbolMessage = messages["DNAS" + stockSymbol];
-      } else {
-        symbolMessage = messages[stockSymbol];
-      }
-      if (!symbolMessage) return;
+    if (!stock) return;
 
-      const lastMessage: StructuredDataType =
-        symbolMessage[symbolMessage?.length - 1 || 0];
-      const lastChartData = chartData[0];
+    // 방금 들어온 메시지 가져오기
+    let symbolMessage = /^[A-Za-z]/.test(stockSymbol)
+      ? messages["DNAS" + stockSymbol]
+      : messages[stockSymbol];
+    if (!symbolMessage || symbolMessage.length === 0) return;
 
-      const hhmm = lastChartData.date.slice(-6, -2);
-      const yymmdd = lastChartData.date.slice(0, 8);
-      const newhhmm = lastMessage.time.slice(-6, -2);
+    const lastMessage = symbolMessage[symbolMessage.length - 1];
 
-      if (hhmm == newhhmm) {
-        const newChartData = {
-          ...lastChartData,
-          date: yymmdd + newhhmm + "00",
-          high:
-            lastChartData.high > lastMessage.currentPrice
-              ? lastChartData.high
-              : lastMessage.currentPrice,
-          low:
-            lastChartData.low < lastMessage.currentPrice
-              ? lastChartData.low
-              : lastMessage.currentPrice,
-          close: lastMessage.currentPrice,
-        };
-
-        const updatedChartData = [...chartData];
-        updatedChartData[0] = newChartData;
-        setChartData((chartData: any) => updatedChartData);
-      } else {
-        const newChartData = {
-          ...lastChartData,
-          date: yymmdd + newhhmm + "00",
-          high: lastMessage.currentPrice,
-          low: lastMessage.currentPrice,
-          open: lastMessage.currentPrice,
-          close: lastMessage.currentPrice,
-        };
-        setChartData((chartData: any) => [newChartData, ...chartData]);
-      }
+    if (isVisible.current) {
+      // 탭이 보이는 상태면 바로 처리
+      processMessage(lastMessage);
+    } else {
+      // 백그라운드일 땐 pending에 추가 (최대 10개만 유지)
+      pendingMessagesRef.current = [
+        ...pendingMessagesRef.current.slice(-9),
+        lastMessage,
+      ];
     }
-  }, [messages]);
+  }, [messages, stock, processMessage]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-20 px-4 sm:px-8">
@@ -220,6 +266,8 @@ const StockDetail: React.FC = () => {
       )}
     </div>
   );
-};
+});
+
+StockDetail.displayName = "StockDetail";
 
 export default StockDetail;
