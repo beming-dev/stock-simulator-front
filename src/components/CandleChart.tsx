@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import ReactApexChart from "react-apexcharts";
 
 export interface StockChartData {
@@ -13,43 +13,63 @@ interface CandleChartProps {
   data: StockChartData[];
 }
 
-const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
-  const series = [
-    {
-      data: data.map((d) => ({
-        x: parseApexDate(d.date),
-        y: [
-          parseFloat(d.open),
-          parseFloat(d.high),
-          parseFloat(d.low),
-          parseFloat(d.close),
-        ],
-      })),
-    },
-  ];
+const CandleChart: React.FC<CandleChartProps> = React.memo(({ data }) => {
+  // 차트 데이터 메모이제이션으로 성능 최적화
+  const series = useMemo(
+    () => [
+      {
+        data: data.map((d) => ({
+          x: parseApexDate(d.date),
+          y: [
+            parseFloat(d.open),
+            parseFloat(d.high),
+            parseFloat(d.low),
+            parseFloat(d.close),
+          ],
+        })),
+      },
+    ],
+    [data]
+  );
 
-  const options: ApexCharts.ApexOptions = {
-    chart: {
-      type: "candlestick",
-      height: 400,
-      toolbar: { show: true },
-      zoom: { enabled: true },
-    },
-    xaxis: {
-      type: "datetime",
-      labels: { datetimeUTC: false },
-    },
-    yaxis: {
-      tooltip: { enabled: true },
-      decimalsInFloat: 2,
-    },
-    tooltip: {
-      enabled: true,
-      shared: true,
-      x: { format: "yyyy-MM-dd HH:mm" },
-    },
-    grid: { show: true },
-  };
+  const options: ApexCharts.ApexOptions = useMemo(
+    () => ({
+      chart: {
+        type: "candlestick",
+        height: 400,
+        toolbar: { show: true },
+        zoom: { enabled: true },
+        animations: {
+          enabled: true,
+          easing: "easeinout",
+          speed: 300,
+          animateGradually: {
+            enabled: true,
+            delay: 150,
+          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350,
+          },
+        },
+      },
+      xaxis: {
+        type: "datetime",
+        labels: { datetimeUTC: false },
+      },
+      yaxis: {
+        tooltip: { enabled: true },
+        decimalsInFloat: 2,
+      },
+      tooltip: {
+        enabled: true,
+        shared: true,
+        x: { format: "yyyy-MM-dd HH:mm" },
+      },
+      grid: { show: true },
+    }),
+    []
+  );
 
   return (
     <div style={{ width: "100%", minHeight: 400 }}>
@@ -61,7 +81,9 @@ const CandleChart: React.FC<CandleChartProps> = ({ data }) => {
       />
     </div>
   );
-};
+});
+
+CandleChart.displayName = "CandleChart";
 
 // 날짜 문자열을 JS Date 객체로 변환 (ApexCharts용)
 function parseApexDate(dateStr: string): number {

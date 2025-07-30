@@ -94,11 +94,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         setMessages((prev) => {
           const symbol = structuredData.symbol;
           const updatedSymbolMessages = prev[symbol] || [];
+
+          // 모든 메시지를 추가 (중복 제거하지 않음)
           const updatedMessagesForSymbol = [
             ...updatedSymbolMessages,
             structuredData,
           ];
-          const limitedMessages = updatedMessagesForSymbol.slice(-20);
+
+          // 최대 10개만 유지하여 메모리 사용량 제한
+          const limitedMessages = updatedMessagesForSymbol.slice(-10);
 
           return {
             ...prev,
