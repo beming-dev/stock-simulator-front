@@ -49,7 +49,7 @@ const StockVolume: React.FC<VolumeProps> = ({
   return (
     <div className="mt-20">
       <h2 className="text-md sm:text-lg font-bold text-gray-700 mb-2">
-        Trading Volume ({realtimeData.length} transactions)
+        Trading Volume
       </h2>
       {/* Table for large screens */}
       <div className="hidden sm:block border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
