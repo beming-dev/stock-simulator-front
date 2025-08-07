@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { StockUtils } from "../utils/stock";
+import { STOCK } from "../constants/Stock";
 
 interface Stock {
   symb: string;
@@ -10,6 +12,8 @@ interface Stock {
 }
 
 const StockItem = (stock: Stock) => {
+  const country = StockUtils.KoEnBySymbol(stock.symb);
+
   return (
     <Link to={`/detail?id=${stock.symb}`} key={stock.symb}>
       <div
@@ -19,7 +23,8 @@ const StockItem = (stock: Stock) => {
         <h4 className="text-lg font-bold text-gray-800">{stock.name}</h4>
         <span className="font-bold text-gray-700 mt-2">({stock.symb})</span>
         <p className="text-gray-600 mt-2">
-          {stock.last}\{" "}
+          {stock.last}
+          {country === STOCK.COUNTRY.KO ? "\\" : "$"}{" "}
           <span
             className={`font-bold ${
               stock.rate.substring(0, 1) === "-"

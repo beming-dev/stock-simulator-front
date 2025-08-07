@@ -239,8 +239,16 @@ const StockDetail: React.FC = React.memo(() => {
                 className="w-full sm:w-1/3 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <div className="flex w-full sm:w-auto justify-between space-x-4">
-                <BuyBtn stockSymbol={stockSymbol} quantity={quantity} />
-                <SellBtn stockSymbol={stockSymbol} quantity={quantity} />
+                <BuyBtn
+                  stockSymbol={stockSymbol}
+                  quantity={quantity}
+                  price={stock.price}
+                />
+                <SellBtn
+                  stockSymbol={stockSymbol}
+                  quantity={quantity}
+                  price={stock.price}
+                />
               </div>
             </div>
           </div>

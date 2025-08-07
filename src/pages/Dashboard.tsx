@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { StockUtils } from "../utils/stock";
 
 interface Trade {
   symbol: string;
   amount: number;
   average: number;
+  stockName: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -77,6 +79,9 @@ const Dashboard: React.FC = () => {
                   //trade.currentPrice
                   trade.average
                 );
+                const country = StockUtils.KoEnBySymbol(trade.symbol);
+                const currentSymbol = StockUtils.GetSymbolByCountry(country);
+
                 return (
                   <tr
                     key={trade.symbol}
@@ -84,7 +89,7 @@ const Dashboard: React.FC = () => {
                     onClick={() => navigate(`/detail?id=${trade.symbol}`)}
                   >
                     <td className="p-4 text-left text-sm text-gray-800 border-b">
-                      {trade.symbol}
+                      {trade.stockName}
                     </td>
                     <td className="p-4 text-left text-sm text-gray-800 border-b">
                       {trade.symbol}
@@ -93,10 +98,12 @@ const Dashboard: React.FC = () => {
                       {trade.amount}
                     </td>
                     <td className="p-4 text-right text-sm text-gray-800 border-b">
-                      ${trade.average.toFixed(2)}
+                      {currentSymbol}
+                      {trade.average.toFixed(2)}
                     </td>
                     <td className="p-4 text-right text-sm text-gray-800 border-b">
-                      ${trade.average.toFixed(2)}
+                      {currentSymbol}
+                      {trade.average.toFixed(2)}
                     </td>
                     <td
                       className={`p-4 text-right text-sm font-semibold border-b ${
@@ -125,7 +132,7 @@ const Dashboard: React.FC = () => {
                   onClick={() => navigate(`/detail?id=${trade.symbol}`)}
                 >
                   <h3 className="text-lg font-bold text-gray-800">
-                    {trade.symbol} ({trade.symbol})
+                    {trade.stockName} ({trade.symbol})
                   </h3>
                   <p className="text-sm text-gray-600">
                     Quantity: {trade.amount}

@@ -4,9 +4,10 @@ import axiosWithToken from "../utils/customAxios";
 interface BuyProps {
   stockSymbol: string;
   quantity: number;
+  price: number;
 }
 
-const BuyBtn: React.FC<BuyProps> = ({ stockSymbol, quantity }) => {
+const BuyBtn: React.FC<BuyProps> = ({ stockSymbol, quantity, price }) => {
   const { token } = useAuth();
 
   const handleBuy = async () => {
@@ -17,6 +18,7 @@ const BuyBtn: React.FC<BuyProps> = ({ stockSymbol, quantity }) => {
     await axiosWithToken(token).post("/stock/buy", {
       symbol: stockSymbol,
       amount: quantity,
+      price,
     });
     alert(`Successfully bought ${quantity} shares of ${stockSymbol}`);
   };
