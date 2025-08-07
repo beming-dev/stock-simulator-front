@@ -242,12 +242,12 @@ const StockDetail: React.FC = React.memo(() => {
                 <BuyBtn
                   stockSymbol={stockSymbol}
                   quantity={quantity}
-                  price={stock.price}
+                  price={stock.price as number}
                 />
                 <SellBtn
                   stockSymbol={stockSymbol}
                   quantity={quantity}
-                  price={stock.price}
+                  price={stock.price as number}
                 />
               </div>
             </div>

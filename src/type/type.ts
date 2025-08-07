@@ -5,7 +5,7 @@ export type MockStockData = {
 export type StockData = {
   symbol: string;
   name: string;
-  price: string;
+  price: string | number;
   high: number;
   low: number;
   country: string;

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
               const info = list.find((s) => s.symbol === trade.symbol);
               return {
                 ...trade,
-                currentPrice: parseFloat(info?.price ?? "0"),
+                currentPrice: parseFloat((info?.price as string) ?? "0"),
               };
             })
           );
