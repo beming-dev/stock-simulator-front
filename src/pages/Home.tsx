@@ -17,6 +17,12 @@ const Home: React.FC = () => {
       >
         Go to Dashboard
       </Link>
+      <Link
+        to="/search"
+        className="bg-blue-500 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-600 transition duration-200 mt-6"
+      >
+        Search Stock
+      </Link>
       <div className="mt-12 w-full max-w-4xl  pt-10">
         <StockList />
       </div>
