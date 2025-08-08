@@ -20,4 +20,18 @@ export class StockUtils {
         return STOCK.SYMBOL.DEFAULT;
     }
   }
+
+  static calculateProfitRate = (averagePrice: number, currentPrice: number) => {
+    const result = ((currentPrice - averagePrice) / averagePrice) * 100;
+    return result.toFixed(2);
+  };
+
+  static calculateProfitAmount = (
+    averagePrice: number,
+    currentPrice: number,
+    amount: number
+  ) => {
+    const result = currentPrice * amount - averagePrice * amount;
+    return result.toFixed(2);
+  };
 }

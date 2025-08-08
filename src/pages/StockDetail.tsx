@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 // import StockChart from "../components/StockChart";
-import { StockData } from "../type/type";
+import { Holding, StockData } from "../type/type";
 import axios from "axios";
 import { StructuredDataType, useWebSocket } from "../context/WebSocketContext";
 import CandleChart, { StockChartData } from "../components/CandleChart";
@@ -9,6 +9,9 @@ import Star from "../components/Star";
 import BuyBtn from "../components/BuyBtn";
 import SellBtn from "../components/SellBtn";
 import StockVolume from "../components/StockVolume";
+import axiosWithToken from "../utils/customAxios";
+import { useAuth } from "../context/AuthContext";
+import { StockUtils } from "../utils/stock";
 
 const StockDetail: React.FC = React.memo(() => {
   const [searchParams] = useSearchParams();
@@ -18,9 +21,11 @@ const StockDetail: React.FC = React.memo(() => {
   const [quantity, setQuantity] = useState<number>(0);
   const [currentSymbol, setCurrentSymbol] = useState("$");
   const [chartData, setChartData] = useState<StockChartData[]>([]);
+  const [holding, setHolding] = useState<null | Holding>(null);
 
   const { sendMessage, messages, isConnected } = useWebSocket();
   const location = useLocation();
+  const { token } = useAuth();
 
   // 성능 최적화를 위한 ref들
   const isVisible = useRef<boolean>(true);
@@ -104,6 +109,15 @@ const StockDetail: React.FC = React.memo(() => {
     axios
       .get(`${backUrl}/stockApi/chartData?SYMB=${stockSymbol}`)
       .then(({ data }: { data: StockChartData[] }) => setChartData(data));
+
+    if (token) {
+      axiosWithToken(token)
+        .get(`${backUrl}/stock/item?symbol=${stockSymbol}`)
+        .then(({ data }: { data: Holding }) => {
+          console.log(data);
+          setHolding(data);
+        });
+    }
   }, []);
 
   //select current symbol after stock data is fetched
@@ -223,13 +237,6 @@ const StockDetail: React.FC = React.memo(() => {
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-4">
               Trade
             </h2>
-            <div className="flex justify-center items-center mb-4">
-              <span className="shrink-0 mr-4">Current price: </span>
-              <span className="m-0 w-full sm:w-1/3">
-                {currentSymbol}
-                {stock.price || ""}
-              </span>
-            </div>
             <div className="flex flex-wrap items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <input
                 type="number"
@@ -243,13 +250,70 @@ const StockDetail: React.FC = React.memo(() => {
                   stockSymbol={stockSymbol}
                   quantity={quantity}
                   price={stock.price as number}
+                  setHolding={setHolding}
                 />
                 <SellBtn
                   stockSymbol={stockSymbol}
                   quantity={quantity}
                   price={stock.price as number}
+                  maximum={holding ? holding.amount : 0}
+                  setHolding={setHolding}
                 />
               </div>
+            </div>
+
+            {/* 요약 대시보드 */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
+              {/* 현재 가격 */}
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <p className="text-sm text-gray-500">Average Price</p>
+                <p className="text-base sm:text-lg font-semibold text-gray-800">
+                  {holding && currentSymbol}
+                  {holding?.average?.toFixed(2) || "No Stock"}
+                </p>
+              </div>
+
+              {/* 보유 수량 */}
+              <div className="bg-gray-50 p-4 rounded-lg shadow">
+                <p className="text-sm text-gray-500">Holdings</p>
+                <p className="text-base sm:text-lg font-semibold text-gray-800">
+                  {holding ? holding?.amount : 0} shares
+                </p>
+              </div>
+
+              {/* 수익률 */}
+              <div
+                className={` sm:col-span-2 bg-gray-50 p-4 rounded-lg shadow ${
+                  parseFloat("1") < 0 ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                <p className="text-sm text-gray-500">Profit Rate</p>
+                <p className="text-base sm:text-lg font-semibold">
+                  {holding
+                    ? StockUtils.calculateProfitAmount(
+                        holding?.average as number,
+                        parseFloat(stock.price as string),
+                        holding.amount
+                      )
+                    : 0}
+                  {holding && currentSymbol}&nbsp;(
+                  {holding
+                    ? StockUtils.calculateProfitRate(
+                        holding?.average as number,
+                        parseFloat(stock.price as string)
+                      )
+                    : 0}
+                  %)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-start items-center mt-4">
+              <span className="shrink-0 mr-4">Current price: </span>
+              <span className="m-0 w-full sm:w-1/3">
+                {currentSymbol}
+                {stock.price || ""}
+              </span>
             </div>
           </div>
 

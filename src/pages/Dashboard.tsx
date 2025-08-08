@@ -21,10 +21,6 @@ const Dashboard: React.FC = () => {
 
   const [stockList, setStockList] = useState<Trade[]>([]);
 
-  const calculateProfitLoss = (averagePrice: number, currentPrice: number) => {
-    return ((currentPrice - averagePrice) / averagePrice) * 100;
-  };
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -123,7 +119,7 @@ const Dashboard: React.FC = () => {
             </thead>
             <tbody>
               {stockList.map((trade) => {
-                const profitLoss = calculateProfitLoss(
+                const profitLoss = StockUtils.calculateProfitRate(
                   trade.average,
                   trade.currentPrice || trade.average
                 );
@@ -155,10 +151,12 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td
                       className={`p-4 text-right text-sm font-semibold border-b ${
-                        profitLoss >= 0 ? "text-green-500" : "text-red-500"
+                        (profitLoss as number) >= 0
+                          ? "text-green-500"
+                          : "text-red-500"
                       }`}
                     >
-                      {profitLoss.toFixed(2)}%
+                      {profitLoss}%
                     </td>
                   </tr>
                 );
@@ -172,7 +170,7 @@ const Dashboard: React.FC = () => {
               const country = StockUtils.KoEnBySymbol(trade.symbol);
               const currentSymbol = StockUtils.GetSymbolByCountry(country);
 
-              const profitLoss = calculateProfitLoss(
+              const profitLoss = StockUtils.calculateProfitRate(
                 trade.average,
                 trade.currentPrice || trade.average
               );
@@ -198,10 +196,12 @@ const Dashboard: React.FC = () => {
                   </p>
                   <p
                     className={`text-sm font-semibold ${
-                      profitLoss >= 0 ? "text-green-500" : "text-red-500"
+                      parseFloat(profitLoss) >= 0
+                        ? "text-green-500"
+                        : "text-red-500"
                     }`}
                   >
-                    Profit/Loss: {profitLoss.toFixed(2)}%
+                    Profit/Loss: {profitLoss}%
                   </p>
                 </div>
               );

@@ -2,6 +2,14 @@ export type MockStockData = {
   [key: string]: StockData;
 };
 
+export type Holding = {
+  id: number;
+  amount: number;
+  average: number;
+  buyPrice: number;
+  symbol: string;
+};
+
 export type StockData = {
   symbol: string;
   name: string;

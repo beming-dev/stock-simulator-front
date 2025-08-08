@@ -1,13 +1,20 @@
 import { useAuth } from "../context/AuthContext";
+import { Holding } from "../type/type";
 import axiosWithToken from "../utils/customAxios";
 
 interface BuyProps {
   stockSymbol: string;
   quantity: number;
   price: number;
+  setHolding: (holding: Holding | null) => void;
 }
 
-const BuyBtn: React.FC<BuyProps> = ({ stockSymbol, quantity, price }) => {
+const BuyBtn: React.FC<BuyProps> = ({
+  stockSymbol,
+  quantity,
+  price,
+  setHolding,
+}) => {
   const { token } = useAuth();
 
   const handleBuy = async () => {
@@ -15,11 +22,13 @@ const BuyBtn: React.FC<BuyProps> = ({ stockSymbol, quantity, price }) => {
       alert("로그인 후 이용해주세요");
       return;
     }
-    await axiosWithToken(token).post("/stock/buy", {
+    const { data } = await axiosWithToken(token).post("/stock/buy", {
       symbol: stockSymbol,
       amount: quantity,
       price,
     });
+
+    setHolding(data);
     alert(`Successfully bought ${quantity} shares of ${stockSymbol}`);
   };
 
