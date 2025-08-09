@@ -62,6 +62,15 @@ const Header: React.FC = () => {
             </li>
             <li>
               <Link
+                to="/search"
+                className="text-white hover:text-yellow-300 transition duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Search
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/dashboard"
                 className="text-white hover:text-yellow-300 transition duration-200"
                 onClick={() => setIsMenuOpen(false)}

@@ -85,7 +85,7 @@ const StockSearchPage: React.FC = () => {
   }, [loading, hasMore]);
 
   return (
-    <div className="max-w-5xl mx-auto mt-8">
+    <div className="max-w-5xl mx-auto mt-8 px-6 overflow-x-hidden">
       <h1 className="text-2xl font-bold text-gray-800 mb-4 mt-20">
         Stock Search
       </h1>
@@ -96,21 +96,25 @@ const StockSearchPage: React.FC = () => {
         className="w-full p-2 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      {/* ─────────── 결과 그리드 ─────────── */}
-      {results.length === 0 && !loading && query && (
-        <p className="text-center text-gray-500">No results found.</p>
-      )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 min-h-screen">
-        {results.map((stock) => (
-          <Link
-            key={stock.symbol}
-            to={`/detail?id=${stock.symbol}`}
-            className="block p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition"
-          >
-            <p className="font-semibold text-gray-800 truncate">{stock.name}</p>
-            <p className="text-sm text-gray-500 truncate">{stock.symbol}</p>
-          </Link>
-        ))}
+      <div className="w-full min-h-screen">
+        {/* ─────────── 결과 그리드 ─────────── */}
+        {results.length === 0 && !loading && query && (
+          <p className="text-center text-gray-500">No results found.</p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
+          {results.map((stock) => (
+            <Link
+              key={stock.symbol}
+              to={`/detail?id=${stock.symbol}`}
+              className="block p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition"
+            >
+              <p className="font-semibold text-gray-800 truncate">
+                {stock.name}
+              </p>
+              <p className="text-sm text-gray-500 truncate">{stock.symbol}</p>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* 옵저버용 빈 div */}
