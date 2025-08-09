@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td
                       className={`p-4 text-right text-sm font-semibold border-b ${
-                        (profitLoss as number) >= 0
+                        parseFloat(profitLoss) >= 0
                           ? "text-green-500"
                           : "text-red-500"
                       }`}
