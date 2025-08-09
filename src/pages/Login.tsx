@@ -24,7 +24,6 @@ const Login: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Username:", username, "Password:", password);
     navigate("/dashboard");
   };
 

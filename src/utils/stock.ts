@@ -1,4 +1,5 @@
 import { STOCK } from "../constants/Stock";
+import { Trade } from "../pages/Dashboard";
 
 export class StockUtils {
   static KoEnBySymbol(symbol: string): string {
@@ -33,5 +34,30 @@ export class StockUtils {
   ) => {
     const result = currentPrice * amount - averagePrice * amount;
     return result.toFixed(2);
+  };
+
+  static calculateTotalProfit = (stockList: Trade[]) => {
+    const ret = {
+      [STOCK.COUNTRY.KO]: {
+        totalAmount: 0,
+        profit: 0,
+        original: 0,
+      },
+      [STOCK.COUNTRY.EN]: {
+        totalAmount: 0,
+        profit: 0,
+        original: 0,
+      },
+    };
+
+    stockList.forEach((item) => {
+      const country = StockUtils.KoEnBySymbol(item.symbol);
+      ret[country].totalAmount += item.amount * (item.currentPrice || 0);
+      ret[country].profit +=
+        item.amount * ((item.currentPrice || 0) - item.average);
+      ret[country].original += item.amount * item.average;
+    });
+
+    return ret;
   };
 }

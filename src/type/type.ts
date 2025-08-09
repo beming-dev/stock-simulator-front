@@ -44,3 +44,12 @@ export type OverseaStockCurrentPrice = {
   tvol: string; //거래량
   zdiv: string; //소수점자릿수
 };
+
+export type UserInfo = {
+  id: number;
+  gid: string;
+  won: number;
+  dollars: number;
+  nickname: string;
+  provider: string;
+};
