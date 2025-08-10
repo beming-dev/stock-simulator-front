@@ -10,7 +10,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (isLoggedIn) navigate("/dashboard");
-  }, []);
+  }, [isLoggedIn, navigate]);
 
   function handleGoogleLogin() {
     const BACK_BASE_URL = import.meta.env.VITE_BACK_BASE_URL;
@@ -33,7 +33,17 @@ const Login: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-700 text-center mb-6">
           Welcome Back!
         </h2>
-        <form onSubmit={handleLogin} className="space-y-4">
+
+        {/* 안내 문구 */}
+        <p className="text-center text-sm text-red-500 mb-4">
+          Only Google login is supported until now
+        </p>
+
+        {/* 일반 로그인 폼 (비활성화 상태) */}
+        <form
+          onSubmit={handleLogin}
+          className="space-y-4 opacity-50 pointer-events-none"
+        >
           <div>
             <label
               htmlFor="username"
@@ -48,7 +58,7 @@ const Login: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Enter your username"
-              required
+              disabled
             />
           </div>
           <div>
@@ -65,16 +75,19 @@ const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               placeholder="Enter your password"
-              required
+              disabled
             />
           </div>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-200"
+            disabled
           >
             Login
           </button>
         </form>
+
+        {/* Google 로그인 버튼 */}
         <div className="mt-6">
           <button
             onClick={handleGoogleLogin}
@@ -105,6 +118,7 @@ const Login: React.FC = () => {
             <span>Continue with Google</span>
           </button>
         </div>
+
         <div className="mt-4 text-center">
           <a href="#" className="text-sm text-blue-500 hover:underline">
             Forgot password?
