@@ -328,9 +328,12 @@ const StockDetail: React.FC = React.memo(() => {
         </div>
       ) : (
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-700">
+          <h2 className="text-3xl sm:text-3xl font-bold text-gray-700">
             Stock Not Found
           </h2>
+          <h3 className="text-2xl sm:text-2xl font-bold text-gray-700">
+            (ETF and Reverage is not supported yet.)
+          </h3>
           <p className="text-sm sm:text-base text-gray-500">
             Please provide a valid stock ID in the query.
           </p>
