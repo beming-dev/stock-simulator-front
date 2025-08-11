@@ -94,7 +94,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     heartbeatTimerRef.current = window.setInterval(() => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         try {
-          wsRef.current.send("ping");
+          wsRef.current.send(JSON.stringify({ type: "ping" }));
         } catch (e) {
           // ignore
         }
